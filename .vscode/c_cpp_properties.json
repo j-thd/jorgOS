@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "ARM",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:\\Program Files\\ArmCompilerforEmbedded6.22\\include",
+                "C:\\code\\custom-cmsis",
+                "C:\\code\\custom-cmsis\\CMSIS-arm-default\\Core\\Include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "TM4C123GH6PM",
+                "JSM_ENABLE",
+                "__CC_ARM" // Not ure if correct, but it makes the uint32_t error go away without breaking IntelliSense
+            ],
+            "compilerPath": "C:\\Program Files\\ArmCompilerforEmbedded6.22\\bin\\armclang.exe",
+            "cStandard": "c17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "windows-clang-arm",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        }
+    ],
+    "version": 4
+}

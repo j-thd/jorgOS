@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/image/TM4C123GH6PM.axf",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "interface": "jtag",
+            "device": "TM4C123GH6PM",
+            "searchDir": ["C:\\tools\\openocd\\xpack-openocd-0.12.0-3\\openocd\\scripts\\board"],
+            "configFiles": ["ti_ek-tm4c123gxl.cfg"],
+            "svdFile": "./device/TM4C123GH6PM/TM4C123GH6PM.svd",
+            "runToMain": true,
+            //"cmsisPack": "${command:device-manager.getDevicePack}"
+        }
+    ]
+}

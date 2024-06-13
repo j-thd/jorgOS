@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "tm4c123.h": "c",
+        "tm4c123gh6pm.h": "c",
+        "core_cm4.h": "c",
+        "stdint.h": "c",
+        "bsp.h": "c",
+        "runtime_environment.h": "c",
+        "jorgos.h": "c",
+        "stdio.h": "c"
+    },
+    "cortex-debug.variableUseNaturalFormat": false
+}
