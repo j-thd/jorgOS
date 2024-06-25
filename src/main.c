@@ -14,9 +14,7 @@ uint32_t blinky_blue_stack[BLINKY_BLUE_STACKSIZE];
 OS_Thread blinky_blue_thread;
 
 void blinky_blue(void){
-    // __disable_irq();
     JSM_PRINTF("Blinky blue thread started!\n");
-    // __enable_irq();
     while(1) {
         J_ASSERT_STACK_INTEGRITY(blinky_blue_stack, BLINKY_BLUE_STACKSIZE);
         GPIOF_AHB->DATA_BITS[(LED_BLUE)] = LED_BLUE;    
@@ -32,10 +30,7 @@ uint32_t blinky_green_stack[BLINKY_GREEN_STACKSIZE];
 OS_Thread blinky_green_thread;
 
 void blinky_green(void){
-    // __disable_irq();
-    J_ASSERT(0);
     JSM_PRINTF("Blinky green thread started!\n");
-    // __enable_irq();
     while(1) {
         J_ASSERT_STACK_INTEGRITY(blinky_green_stack, BLINKY_GREEN_STACKSIZE);
         GPIOF_AHB->DATA_BITS[(LED_GREEN)] = LED_GREEN;    

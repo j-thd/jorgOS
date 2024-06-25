@@ -27,23 +27,17 @@ void BSP_init(void){
 }
 
 __attribute__((noreturn)) void J_on_assert_failed (char const *file, int line) {
-    // UART_write(UART0, 'E');
-    // UART_write(UART0, 'r');
-    // UART_write(UART0, 'r');
-    // UART_write(UART0, 'o');
-    // UART_write(UART0, 'r');
-    // UART_write(UART0, '!');
-    // UART_write(UART0, '\r');
-    // UART_write(UART0, '\n');
-
     JSM_PRINTF("[ASSERTION FAILED] File %s on line %u\n", file, line);
-    JSM_transmit_buffer();
-    UART_delay_until_not_busy(UART0);
-    // volatile int i = 1000;
-    // while (i>0){
-    //     i--;
-    // }
-    //UART_disable(UART0);
+    
+    // Only transmit the buffer before reset if JSM is enabled.
+    #ifdef JSM_ENABLE
+        // The buffer must be transmitted now, as it normally only happens in the
+        // idle thread.
+        JSM_transmit_buffer();
+        // The UART must finish sending the last character, and JSM_transmit_buffer
+        // returns before that is done. Only then reset the MCU.
+        UART_delay_until_not_busy(UART0);
+    #endif // JSM_ENABLE
     NVIC_SystemReset();
     while(1){
         // Shuts up faulty warning about not returning. The compiler does not understand NVIC_SYSTEM_reset
