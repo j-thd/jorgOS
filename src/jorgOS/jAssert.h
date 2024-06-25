@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+
+
 // The base assert macro
 #define J_ASSERT(expr_) \
     (expr_) ? (void *)0 : J_assert_failed(__FILE__, __LINE__)
@@ -14,7 +16,7 @@
         J_assert_failed(__FILE__, __LINE__);\
     } while(0) // Always an error, code should not be reached
 
-
+#define J_DEFAULT_STACK_FILLER 0xDEADBEEF
 #define J_ASSERT_STACK_INTEGRITY(stack_, stack_size_) J_assert_stack_integrity(stack_,stack_size_)
 
 //Dealing with assertions

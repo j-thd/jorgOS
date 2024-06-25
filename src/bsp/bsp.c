@@ -27,14 +27,23 @@ void BSP_init(void){
 }
 
 __attribute__((noreturn)) void J_on_assert_failed (char const *file, int line) {
-    UART_write(UART0, 'E');
-    UART_write(UART0, 'r');
-    UART_write(UART0, 'r');
-    UART_write(UART0, 'o');
-    UART_write(UART0, 'r');
-    UART_write(UART0, '!');
-    UART_write(UART0, '\r');
-    UART_write(UART0, '\n');
+    // UART_write(UART0, 'E');
+    // UART_write(UART0, 'r');
+    // UART_write(UART0, 'r');
+    // UART_write(UART0, 'o');
+    // UART_write(UART0, 'r');
+    // UART_write(UART0, '!');
+    // UART_write(UART0, '\r');
+    // UART_write(UART0, '\n');
+
+    JSM_PRINTF("[ASSERTION FAILED] File %s on line %u\n", file, line);
+    JSM_transmit_buffer();
+    UART_delay_until_not_busy(UART0);
+    // volatile int i = 1000;
+    // while (i>0){
+    //     i--;
+    // }
+    //UART_disable(UART0);
     NVIC_SystemReset();
     while(1){
         // Shuts up faulty warning about not returning. The compiler does not understand NVIC_SYSTEM_reset

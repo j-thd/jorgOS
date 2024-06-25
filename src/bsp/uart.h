@@ -33,6 +33,8 @@
 #define UARTFR_BUSY (1U << 3)
 
 void UART0_init(uint32_t baud_rate);
-void UART_write(UART0_Type* UARTn_base, uint8_t c);
+void UART_write(UART0_Type* UARTn, uint8_t c);
+void UART_disable(UART0_Type* UARTn);
+void UART_delay_until_not_busy(UART0_Type* UARTn);
 
 #endif // __UART_H__

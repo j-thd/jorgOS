@@ -14,6 +14,10 @@ __attribute__((noreturn)) void J_assert_failed(char const *file, int line) {
 /// @param stack uint32_t * - Pointer to the stack 
 /// @param stack_size uint16_t - Size of the stack (4 bytes = size 1)
 void J_assert_stack_integrity(uint32_t * stack, uint16_t stack_size){
+    /*
+     *    STACK POINTER BOUNDS CHECK
+    */
+    
     //Somehow obtain the stack-pointer and check if it is in bounds of the
     //stack.
     uint32_t * current_sp;
@@ -37,4 +41,18 @@ void J_assert_stack_integrity(uint32_t * stack, uint16_t stack_size){
     J_ASSERT(current_sp >= stack);
     // Check the top of the stack
     J_ASSERT(current_sp <= (stack + stack_size + 1));
+
+    /*
+     *    STACK OVERFLOW CHECK
+    */
+
+   // J_DEFAULT_STACK_FILLER was used to fill empty places in the stack when the
+   // stack was created. The last available place in the stack can be used to
+   // check how much the stack has grown. If the filler value is no longer
+   // there, the stack has overflown.
+
+   // The grows from top to bottom, so the last value should be at the lowest
+   // point of memory.
+
+   J_ASSERT(stack[1] == J_DEFAULT_STACK_FILLER);
 }

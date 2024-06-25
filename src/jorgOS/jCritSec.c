@@ -8,6 +8,7 @@
 
 
 static uint8_t critical_section_depth; // Counts how deeply nested the criticals sections are
+#define J_MAX_CRIT_SEC_DEPTH 255 // Set the depth in accordance with the maximum value stored in the depth counter
 
 /// @brief The critical section depth must be initialized to 0 when the OS
 /// starts. 
@@ -18,8 +19,8 @@ void J_crit_sec_init(){
 /// @brief Start a critical section, with jorgOS keeping track of nested
 /// sections. It is mandatory to use this unless nesting is impossible.
 void J_crit_sec_start(){
-    // The counter must not overflow beyond 255.
-    J_REQUIRE( critical_section_depth < 254 );
+    // The counter must not overflow beyond 255
+    J_REQUIRE( critical_section_depth < J_MAX_CRIT_SEC_DEPTH );
     // First disable the interupts, then increment the counter.
     __disable_irq(); 
     ++critical_section_depth;

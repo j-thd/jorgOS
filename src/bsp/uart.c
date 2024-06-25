@@ -60,6 +60,12 @@ void UART0_init(uint32_t baud_rate){
 
 }
 
+/// @brief Disables specific UART n by writing to the UART control register.
+/// @param UARTn_base The base address of UART n 
+void UART_disable(UART0_Type* UARTn_base){
+    UARTn_base->CTL &= ~UARTCTL_UARTEN;
+}
+
 void UART_write(UART0_Type* UARTn, uint8_t c){
     // Loop until the UART is no longer busy, then send another character.
     while(UARTn->FR & UARTFR_BUSY ){
@@ -67,4 +73,12 @@ void UART_write(UART0_Type* UARTn, uint8_t c){
     }
     UARTn->DR = c; // Put the character in the data register.
 
+}
+
+/// @brief Delay until UART n is no longer busy.
+/// @param UARTn The base address of UART n 
+void UART_delay_until_not_busy(UART0_Type* UARTn){
+    while(UARTn->FR & UARTFR_BUSY ){
+
+    }
 }

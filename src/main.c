@@ -33,6 +33,7 @@ OS_Thread blinky_green_thread;
 
 void blinky_green(void){
     // __disable_irq();
+    J_ASSERT(0);
     JSM_PRINTF("Blinky green thread started!\n");
     // __enable_irq();
     while(1) {

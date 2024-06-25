@@ -160,7 +160,10 @@ void OS_Thread_start(
     me->sp = sp;
     stack_limit = (uint32_t *)(((((uint32_t)stack - 1U) / 8U) + 1U) * 8U);
     for (sp = sp - 1U; sp >= stack_limit; --sp){
-        *sp = 0xDEADBEEFU;
+        // A default stack filler value is used, so a stack overflow can be
+        // detected. This is done with J_ASSERT_STACK_INTEGRITY
+        *sp = J_DEFAULT_STACK_FILLER; 
+
     }
 
 /*******

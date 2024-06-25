@@ -9,5 +9,5 @@
         "jorgos.h": "c",
         "stdio.h": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": false
+    "cortex-debug.variableUseNaturalFormat": true
 }
