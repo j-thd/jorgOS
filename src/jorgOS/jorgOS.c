@@ -1,5 +1,6 @@
 #include "jorgOS.h"
 #include "jAssert.h"
+#include "jCritSec.h"
 #include "runtime_environment.h"
 
 // Port should go here instead #include "runtime_environment.h"
@@ -21,8 +22,10 @@ uint32_t idle_thread_stack[IDLE_THREAD_STACKSIZE];
 
 //All threads will be stored with pointers to the Thread Control Blocks
 OS_Thread *OS_thread_list[MAX_NUMBER_OF_THREADS]; 
-uint32_t OS_ready_set; // A 32-bit mask for ready threads. Idle is always ready, and not in this bitmask
-uint32_t OS_delayed_set; // A 32-bit mask holding the set of delayed threads. Threads can be delayed and NOT ready due to mutexes or stuff like that.
+// A 32-bit mask for ready threads. Idle is always ready, and not in this bitmask
+uint32_t OS_ready_set;
+// A 32-bit mask holding the set of delayed threads. Threads can be delayed and NOT ready due to mutexes or stuff like that.
+uint32_t OS_delayed_set; 
 
 void main_idle_thread(void){
     while(1){
@@ -35,7 +38,10 @@ void OS_init(){
     // Set the Pend SV interupt priority to the lowest level
     SCB->SHP[10] |= (0xF << 4); // IN Core_CM4, SHP is a pointer to uint8_t. So, it is a bit convoluted to access the right register.
     // This ensures run-to-completion of other interupts.
-    
+
+    // Critical section code must be initialized before the OS takes control
+    // to deal with nested critical sections.
+    J_crit_sec_init();
     // The idle thread is created with priority 0. Higher means more priority.
     OS_Thread_start(&idle_thread,
         0U, // Priority
@@ -47,8 +53,11 @@ void OS_init(){
 void OS_delay(uint32_t ticks_delay){
     __disable_irq(); // Race condition galore here. OS_current cannot switch in the meantime, and neither can be the readyset bits be altered.
 
-    // OS_delay may not be called in the idle thread.
+    // OS_delay must not be called in the idle thread.
     J_REQUIRE(OS_curr != OS_thread_list[0]);
+    // A thread should can only be blocked for ONE reason at a time, so no
+    // semaphores should be registered in the Thread Control Block.
+    J_REQUIRE(OS_curr->blocking_sema == (void *)0);
     
     // OS_delay can only be called by the current thread.
     // Add the time-out timer to the current thread.
@@ -61,6 +70,29 @@ void OS_delay(uint32_t ticks_delay){
     // Schedule the next thread, because we want to get out of this thread, of course!
     OS_schedule();
     __enable_irq();
+}
+
+/// @brief OS_sema_block. Should not be called by user but only by
+/// J_sema_wait(). It sets the blocking_sema pointer, which is enough to make
+/// the scheduler take into account the semaphore. Must be called in a critical
+/// section. 
+/// @param sema Pointer to the blocking semaphore (not null).
+void OS_sema_block(J_sema *sema){
+    J_REQUIRE(sema != (void *)0);
+    // OS_sema_block must not be called in the idle thread.
+    J_REQUIRE(OS_curr != OS_thread_list[0]);
+    // A thread should only be blocked for ONE reason at all times, so it should
+    // not have a timer or be in the delayed set. Also, it should still be
+    // ready-to-run.
+    J_REQUIRE(OS_curr->timeout == 0);
+    uint8_t priority_bit = OS_curr->priority -1U;
+    J_REQUIRE((OS_delayed_set & (1U << priority_bit)) == 0U);
+    J_REQUIRE((OS_ready_set & (1U << priority_bit)) != 0U);
+    OS_curr->blocking_sema = sema;
+    // After the the blocking semaphore is set, we just need to call the
+    // scheduler. In its current implementation it will simply check the
+    // blocking_sema pointer when deciding to schedule a thread or not.
+    OS_schedule();
 }
 
 //This function should always be called in a critical section.
@@ -83,8 +115,8 @@ void OS_tick(void){
         priority_bit = thread->priority - 1U;
         // If the thread timeout hits 0, the thread is no longer delayed and ready to run
         if (thread->timeout == 0U){
-            OS_ready_set |= 1U << priority_bit;
-            OS_delayed_set &= ~ priority_bit;
+            OS_ready_set |= 1U << priority_bit; // Set the thread to ready.
+            OS_delayed_set &= ~(1U << priority_bit); // Unset the delayed bit
         }
         // Unset the bit in the working copy.
         delayed_set_working_copy &= ~( 1U << priority_bit );
@@ -111,8 +143,61 @@ void OS_run(void){
 void OS_schedule(void){
     // Priority based-scheduling. Highest priority runs first. 0 is the idle thread.
     // Normal threads range from 1-32.
-    OS_next = OS_thread_list[THREAD_WITH_HIGHEST_PRIORITY(OS_ready_set)];
-    J_ASSERT(OS_next != (void *)0); // The thread must exist
+    // Additionally, a thread that is not delayed and ready to run, could be
+    // blocked by a semaphore, so the blocking_sema will be checked too. If it
+    // is blocked the next ready thread must run.
+
+    uint32_t OS_ready_set_working_copy = OS_ready_set;
+
+    // Go through the ready(not delayed by timer) until one not blocked by a
+    // semaphore is found. 
+
+    // Since this loop should always break when the correct thread is found,
+    // there is no sensible condition to check for, unless convoluted isDone
+    // bools are added instead of the simpler to read break statements.
+    //
+    // As a precaution, however, there will be a counter that triggers an
+    // assertion if there are more loops than there are threads, which should
+    // never happen.
+    uint8_t loop_counts = 0;
+    while(1)
+    {
+        // Intentionally crash the code if this loop runs more often than there
+        // are threads in existence.
+        loop_counts++;
+        J_ASSERT(loop_counts <= MAX_NUMBER_OF_THREADS);
+
+        // Find the next thread not delayed by a timer.
+        OS_next = OS_thread_list[THREAD_WITH_HIGHEST_PRIORITY(OS_ready_set_working_copy)];
+        J_ASSERT(OS_next != (void *)0); // The thread must exist
+        // Check if this thread is blocked by a semaphore.
+        
+        if (OS_next->blocking_sema == (void* ) 0 ){
+            // A null pointer in blocking_sema implies no block.
+            // OS_next is the next thread to run.
+            break;
+        }
+        else {
+            // If there is a pointer, the semaphore counter must be checked. The
+            // thread could potentially be unblocked here.
+            if (J_sema_check_for_ready(OS_next->blocking_sema)){
+                // The semaphore counter was above 0, and J_sema_check_for_ready
+                // has reduced the counter.
+
+                //The thread is no longer blocked by a semaphore, so the
+                //pointer should be set to 0.
+                OS_next->blocking_sema = (void *) 0;
+                break; // OS_next is ready to run, so the loop can break.
+            }
+            else {
+                // The counter was 0. Unset the priority bit in the working set
+                // of ready-to-run(not delayed by timer) threads. Loop again to
+                // find the next ready-to-run thread not blocked a semapphore
+                uint8_t priority_bit = OS_next->priority -1U;
+                OS_ready_set_working_copy &= ~(1 << priority_bit);
+            }
+        }
+    }
 
     // Trigger the PendSV interupt handler when the next thread differs from the current one
     if (OS_next != OS_curr) {
@@ -175,7 +260,7 @@ void OS_Thread_start(
     // There is no need for an assert for the number of threads.
     // There can only be one thread per priority number.
     // The priority is 1-indexed for normal threads, The idle thread has priority 0.
-    J_ASSERT(priority < MAX_NUMBER_OF_THREADS); // No semi-colon here as it is an if-else statement in disguise {}
+    J_ASSERT(priority < MAX_NUMBER_OF_THREADS);
     J_ASSERT(OS_thread_list[priority] == (void *)0U); // Should be a null pointer if no thread is assigned yet at this priority
     
     OS_thread_list[priority] = me;
@@ -184,6 +269,9 @@ void OS_Thread_start(
     if (priority > 0U){
         OS_ready_set |= (1U << (priority-1U) );
     }
+
+    // Initializing the semaphore pointer to 0;
+    me->blocking_sema = (void *)0;
 
 }
 

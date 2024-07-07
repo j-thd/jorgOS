@@ -56,9 +56,9 @@ void SysTick_Handler(void){
 
 void OS_onIdle(void){
     #ifdef JSM_ENABLE
-    GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
+    //GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
     JSM_transmit_buffer();
-    GPIOF_AHB->DATA_BITS[(LED_RED)] = 0;
+    //GPIOF_AHB->DATA_BITS[(LED_RED)] = 0;
     #endif // JSM_ENABLE
     
     __WFI();
