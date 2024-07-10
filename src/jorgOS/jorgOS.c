@@ -78,6 +78,7 @@ void OS_delay(uint32_t ticks_delay){
 /// section. 
 /// @param sema Pointer to the blocking semaphore (not null).
 void OS_sema_block(J_sema *sema){
+    J_REQUIRE_IN_CRIT_SEC;
     J_REQUIRE(sema != (void *)0);
     // OS_sema_block must not be called in the idle thread.
     J_REQUIRE(OS_curr != OS_thread_list[0]);
@@ -97,6 +98,7 @@ void OS_sema_block(J_sema *sema){
 
 //This function should always be called in a critical section.
 void OS_tick(void){
+    J_REQUIRE_IN_CRIT_SEC;
     // Due to the priority-scheduling, and the fact that not ready threads are not neccessarily delayed
     // We must go through the list of DELAYED threads and reduce their timeout downcounter.
     // We copy the delayed bitset, and unset the bit of the threads one by one.
@@ -116,7 +118,7 @@ void OS_tick(void){
         // If the thread timeout hits 0, the thread is no longer delayed and ready to run
         if (thread->timeout == 0U){
             OS_ready_set |= 1U << priority_bit; // Set the thread to ready.
-            OS_delayed_set &= ~(1U << priority_bit); // Unset the delayed bit
+            OS_delayed_set &= ~(1U << priority_bit); // Unset the delayed bitgit 
         }
         // Unset the bit in the working copy.
         delayed_set_working_copy &= ~( 1U << priority_bit );
@@ -141,6 +143,7 @@ void OS_run(void){
 // This function must always be called with interupts DISABLED.
 //  The interupt disable cannot be placed in this function, as enabling it again in the end could re-enable interupts in a function that needed it disabled.
 void OS_schedule(void){
+    J_REQUIRE_IN_CRIT_SEC;
     // Priority based-scheduling. Highest priority runs first. 0 is the idle thread.
     // Normal threads range from 1-32.
     // Additionally, a thread that is not delayed and ready to run, could be

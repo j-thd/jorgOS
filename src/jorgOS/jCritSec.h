@@ -16,6 +16,8 @@
 #ifndef __JCRIT_SEC_H__
 #define __JCRIT_SEC_H__
 
+#include <stdbool.h>
+
 #define J_CRIT_SEC_START J_crit_sec_start
 #define J_CRIT_SEC_END J_crit_sec_end
 
@@ -25,6 +27,7 @@ void J_crit_sec_init();
 void J_crit_sec_start();
 void J_crit_sec_end();
 
+bool J_assert_in_crit_sec();
 
 
 #endif //__JCRIT_SEC_H__

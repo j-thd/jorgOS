@@ -56,9 +56,10 @@ void sema_red(void){
         J_ASSERT_STACK_INTEGRITY(sema_red_stack, SEMA_RED_STACKSIZE);
         // Blink briefly after the semaphore has been signaled.
         JSM_PRINTF("Sema_red waiting... \n");
+        GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
         J_sema_wait(&sema_test);
         JSM_PRINTF("Sema_red thread continues. \n");
-        GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
+        
         OS_delay(BSP_TICKS_PER_SEC / 2U);
         GPIOF_AHB->DATA_BITS[(LED_RED)] = 0;
 

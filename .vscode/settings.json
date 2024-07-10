@@ -7,7 +7,9 @@
         "bsp.h": "c",
         "runtime_environment.h": "c",
         "jorgos.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "system_tm4c123.h": "c",
+        "jassert.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }

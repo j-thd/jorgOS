@@ -2,6 +2,9 @@
 #define __JASSERT_H__
 
 #include <stdint.h>
+#include <stdbool.h>
+
+#include "jCritSec.h"
 
 
 
@@ -11,6 +14,7 @@
 
 #define J_REQUIRE(expr_) J_ASSERT(expr_) // Pre-condition
 #define J_ENSURE(expr_) J_ASSERT(expr_) // Post-condition
+#define J_REQUIRE_IN_CRIT_SEC J_ASSERT(__get_PRIMASK() == true)
 
 #define J_ERROR() do {\
         J_assert_failed(__FILE__, __LINE__);\

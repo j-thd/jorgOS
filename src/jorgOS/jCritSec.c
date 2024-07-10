@@ -1,5 +1,6 @@
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "runtime_environment.h"
 #include "jCritSec.h"
@@ -39,4 +40,8 @@ void J_crit_sec_end(){
     if (critical_section_depth == 0){
         __enable_irq();
     }
+}
+
+bool J_assert_in_crit_sec(){
+    return __get_PRIMASK() == true;
 }

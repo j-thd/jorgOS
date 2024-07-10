@@ -20,9 +20,17 @@ void J_sema_init(J_sema *sema, uint8_t initial_count, uint8_t max_count){
 /// This will results 
 /// @param sema J_sema object
 void J_sema_signal(J_sema *sema){
+    J_CRIT_SEC_START();
     J_REQUIRE(sema != (void *)0);
     J_REQUIRE(sema->count != sema->max_count);
+
     sema->count++;
+    // Calling the scheduler should immediately unlock the thread if it has the
+    // highest priority. And otherwise, it will simply happen as
+    // soon-as-possible.
+    OS_schedule();
+
+    J_CRIT_SEC_END();
 }
 void J_sema_wait(J_sema *sema){
     J_REQUIRE(sema != (void *)0);
