@@ -20,8 +20,13 @@
         J_assert_failed(__FILE__, __LINE__);\
     } while(0) // Always an error, code should not be reached
 
+// Stack integrity
 #define J_DEFAULT_STACK_FILLER 0xDEADBEEF
 #define J_ASSERT_STACK_INTEGRITY(stack_, stack_size_) J_assert_stack_integrity(stack_,stack_size_)
+
+// Thread integrity
+#define J_REQUIRE_ZERO_OR_ONE_BLOCKING_REASON(thread_) J_REQUIRE( ! (thread_->blocking_mutex != (void *)0 && thread_->blocking_sema != (void *)0 ))
+#define J_REQUIRE_ONE_BLOCKING_REASON(thread_) J_REQUIRE(  (thread_->blocking_mutex != (void *)0) != (thread_->blocking_sema != (void *)0 ))
 
 //Dealing with assertions
 void J_assert_failed (char const *file, int line);

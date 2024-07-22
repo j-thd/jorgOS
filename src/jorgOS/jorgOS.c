@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "jorgOS.h"
 #include "jAssert.h"
 #include "jCritSec.h"
@@ -96,6 +99,126 @@ void OS_sema_block(J_sema *sema){
     OS_schedule();
 }
 
+// Mutex functions
+void OS_mutex_acquire(J_mutex * mutex){
+    J_REQUIRE_IN_CRIT_SEC;
+    J_REQUIRE(mutex != (void*)0);
+    //Mutex cannot be acquired again by the same thread.
+    J_REQUIRE(mutex->owned_by != OS_curr); 
+
+    // If the mutex is owned by no thread, simply assign the owner
+    if(mutex->owned_by == (void*)0){
+        mutex->owned_by = OS_curr;
+    }
+    // Otherwise set the blocking_mutex pointer in the Thread Control Block, and
+    // call the scheduler before returning
+    else {
+        OS_curr->blocking_mutex = mutex;
+        OS_schedule();
+        // This will block the current running thread.
+    }
+    return;
+}
+void OS_mutex_release(J_mutex * mutex){
+    J_REQUIRE_IN_CRIT_SEC;
+    J_REQUIRE(mutex != (void*)0);
+    // Mutex can only be released by the thread that acquired it, and it can of
+    // course not be released when it is owned by no-one.
+    J_REQUIRE(mutex->owned_by == OS_curr);
+    // All that is required is to unset the owned_by parameter, which signifies
+    // to the scheduler that another thread blocked by the mutex can now run.
+    // The logic of unlocking threads is contained there.
+    mutex->owned_by = (void *)0;
+    OS_schedule();
+
+}
+
+// SCHEDULER FUNCTIONS
+
+/// @brief Takes a thread and returns whether it is blocked by a semaphore or a
+/// mutex. 
+/// @param thread OS_Thread to be checked for block
+/// @return bool telling whether thread is blocked or no
+bool OS_is_blocked(OS_Thread * volatile thread){
+    J_REQUIRE_IN_CRIT_SEC;
+    J_REQUIRE(thread != (void*)0);
+    // Check that the thread is only blocked for one reason.
+    J_REQUIRE_ZERO_OR_ONE_BLOCKING_REASON(thread);
+    // Since the asserts ensures only one blocking reason, we can safely do a
+    // simple OR || statement.
+    return thread->blocking_mutex != (void *)0  || \
+        thread->blocking_sema != (void *) 0;
+}
+
+/// @brief Function to check if threads are ready AND update the thread control
+/// blocks to the new state if they are ready. The scheduler will only use the
+/// return value to schedule the thread and performs no updates of the TCB of
+/// its own. 
+/// @param thread 
+/// @return bool - true if the thread is ready, false if not. Side effect is
+/// that the Thread Control Block is updated.
+bool OS_check_for_ready(OS_Thread * volatile thread){
+    J_REQUIRE_IN_CRIT_SEC;
+    J_REQUIRE(thread != (void*)0);
+    // Check that the thread is only blocked for one reason.
+    J_REQUIRE_ONE_BLOCKING_REASON(thread);
+    // Since the thread has been asserted to be blocked for one reason, we can
+    // simply go through the possible blocking reasons one-by-one in any random
+    // order.
+    if (thread->blocking_sema != (void *)0 ){
+        // The thread is blocked by a semaphore
+        if (J_sema_check_for_ready(thread->blocking_sema)){
+                // The semaphore counter was above 0, and J_sema_check_for_ready
+                // has reduced the counter.
+
+                //The thread is no longer blocked by a semaphore, so the
+                //pointer should be set to 0.
+                thread->blocking_sema = (void *) 0;
+                return true; // thread is ready to run.
+            }
+            else {
+                // thread is not ready to run.
+                return false;
+            }
+    }
+    else if (thread->blocking_mutex != (void *)0)
+    {
+        //Thread is blocked by a mutex.
+        if (J_Mutex_check_for_ready(thread->blocking_mutex)){
+            // The owning thread has released the mutex, so this checked thread
+            // no longer is blocked by this mutex.
+            // This waiting thread must become the new owner.
+            thread->blocking_mutex->owned_by = thread;
+            // To check the global state of the scheduler, the mutex must now be
+            // owned OS_next which was the candidate thread for running, but
+            // should now be the next thread to run. The scheduler works by
+            // simply setting OS_next to a candidate thread to run, and going
+            // down the priority list until it needs not to be changed any more.
+            // This check must happen here, before the pointer is set to null again.
+            J_ENSURE(thread->blocking_mutex->owned_by == OS_next);
+            // Finally, the Thread Control Block must be updated to set the
+            // blocking mutex to null, which tells the scheduler the thread is
+            // released. This needs to happen at the end, so the pointer to the
+            // mutex is still available to change the owner.
+            thread->blocking_mutex = (void *) 0;
+            return true; // thread is ready to run.
+        }
+        else {
+            return false; // thread is not ready to run.
+        }
+    }
+
+    // One of the if-statements above must have triggered before, because
+    // this function should only be called on a blocked thread. Each
+    // if-statement should return true or false. Therefore the next line of code
+    // should never be executed.
+    J_ERROR();
+    
+    // Just a return to soothe the compiler. J_ERROR never returns. Compiler
+    // does not understand.
+    return false;
+}
+
 //This function should always be called in a critical section.
 void OS_tick(void){
     J_REQUIRE_IN_CRIT_SEC;
@@ -175,27 +298,25 @@ void OS_schedule(void){
         J_ASSERT(OS_next != (void *)0); // The thread must exist
         // Check if this thread is blocked by a semaphore.
         
-        if (OS_next->blocking_sema == (void* ) 0 ){
-            // A null pointer in blocking_sema implies no block.
+        if ( !OS_is_blocked(OS_next) ){
             // OS_next is the next thread to run.
             break;
         }
         else {
-            // If there is a pointer, the semaphore counter must be checked. The
-            // thread could potentially be unblocked here.
-            if (J_sema_check_for_ready(OS_next->blocking_sema)){
-                // The semaphore counter was above 0, and J_sema_check_for_ready
-                // has reduced the counter.
+            // If the thread is blocked, OS_check_for_ready can be called, which
+            // will handle it based on the blocking reason (mutex or semaphore)
+            if (OS_check_for_ready(OS_next)){
+                // OS_check_for_ready does all the updating of the mutexes and
+                // semaphores, as well as the Thread Control Blocks. So, only a
+                // break statement is needed.
 
-                //The thread is no longer blocked by a semaphore, so the
-                //pointer should be set to 0.
-                OS_next->blocking_sema = (void *) 0;
                 break; // OS_next is ready to run, so the loop can break.
             }
             else {
-                // The counter was 0. Unset the priority bit in the working set
-                // of ready-to-run(not delayed by timer) threads. Loop again to
-                // find the next ready-to-run thread not blocked a semapphore
+                // The thread could not be unblocked yet. Unset the priority bit
+                // in the working set of ready-to-run(not delayed by timer)
+                // threads. Loop again to find the next ready-to-run thread that
+                // is not blocked.
                 uint8_t priority_bit = OS_next->priority -1U;
                 OS_ready_set_working_copy &= ~(1 << priority_bit);
             }

@@ -9,7 +9,7 @@
 // used to store the characters to send. The buffer will be read and sent in the
 // idle thread. The buffer will be cyclic.
 
-#define JSM_BUFFER_SIZE 200 // How many characters are stored in the buffer. 
+#define JSM_BUFFER_SIZE 255 // How many characters are stored in the buffer. Cannot be higher than max of uint8_t which is the capacity variable 
 static uint8_t buffer[JSM_BUFFER_SIZE];
 static uint8_t * start;  // The start of the buffer in memory
 static uint8_t * end; // The end of the buffer in memory
