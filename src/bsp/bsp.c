@@ -3,6 +3,7 @@
 #include "runtime_environment.h"
 #include "bsp.h"
 #include "jorgOS.h"
+#include "jAssert.h"
 #include "uart.h"
 
 #include <stdio.h>
@@ -13,6 +14,10 @@ void BSP_init(void){
     GPIOF_AHB->DIR |= ( LED_RED | LED_BLUE | LED_GREEN ); //Set Pin direction on pin 1, 2, 3 as output.
     GPIOF_AHB->DEN |= ( LED_RED | LED_BLUE | LED_GREEN ); // Digital Enable 
 
+    // Initializing switches
+    BSP_SWITCH_1_init();
+    BSP_SWITCH_2_init();
+
     // Enable UART0 which communicates over the USB by default
     UART0_init(9600);
     // Use UART0 for the jorgOS Serial Monitor (using printf)
@@ -22,6 +27,48 @@ void BSP_init(void){
     JSM_transmit_buffer();
     #endif //JSM_ENABLE
 
+
+
+}
+
+/// @brief Tick function for any non-OS but board-related updates, such as
+/// debouncing buttons.
+void BSP_tick(){
+    J_REQUIRE_IN_CRIT_SEC;
+    static struct DebouncedButtons {
+        uint32_t depressed;
+        uint32_t previous;
+    } buttons = {0U, 0U};
+
+    uint32_t current;
+    uint32_t temp;
+
+    current = ~GPIOF_AHB->DATA_BITS[SWITCH_1 | SWITCH_2];
+    temp = buttons.depressed;
+    buttons.depressed |= (buttons.previous & current); // Set depressed buttons. (down two ticks in a row)
+    buttons.depressed &= (buttons.previous | current); // Set released buttons (up two ticks in a row)
+    buttons.previous = current;
+
+    // Now check if the depressed state changed.
+    temp ^= buttons.depressed;
+
+    if ( temp & SWITCH_1 ){ // Switch 1 state changed
+        if (buttons.depressed & SWITCH_1){ // Switch 1 was pressed this tick
+            JSM_PRINTF("Switch 1 pressed\n");
+        }
+        else { // The switch was just released
+            JSM_PRINTF("Switch 1 released\n");
+        }
+    }
+
+    if ( temp & SWITCH_2 ){ // Switch 1 state changed
+        if (buttons.depressed & SWITCH_2){ // Switch 1 was pressed this tick
+            JSM_PRINTF("Switch 2 pressed\n");
+        }
+        else { // The switch was just released
+            JSM_PRINTF("Switch 2 released\n");
+        }
+    }
 
 
 }
@@ -50,6 +97,7 @@ void SysTick_Handler(void){
 
     __disable_irq();
     OS_tick();
+    BSP_tick();
     OS_schedule();
     __enable_irq();
 }
@@ -93,4 +141,32 @@ void BSP_LED_blue_on(void){
 
 void BSP_LED_blue_off(void){
     GPIOF_AHB->DATA_BITS[(LED_BLUE)] = 0;
+}
+
+// Switches
+void BSP_SWITCH_1_init(void){
+    // Set the switch as an input (0), enable digital
+    GPIOF_AHB->DIR &= ~SWITCH_1;
+    GPIOF_AHB->DEN |= SWITCH_1;
+
+    // Pull-up resistor
+    GPIOF_AHB->PUR |= SWITCH_1;
+
+
+}
+void BSP_SWITCH_2_init(void){
+    // The registers for Switch 2 are protected, and must be unlocked first.
+    GPIOF_AHB->LOCK = 0x4C4F434B;
+    GPIOF_AHB->CR |= SWITCH_2;
+    // Set the switch as an input (0), enable digital
+    GPIOF_AHB->DIR &= ~SWITCH_2;
+    GPIOF_AHB->DEN |= SWITCH_2;
+
+    // Pull-up resistor
+    GPIOF_AHB->PUR |= SWITCH_2;
+
+    // Restore and relock the commit register
+    GPIOF_AHB->CR &= ~SWITCH_2;
+    GPIOF_AHB->LOCK = 0U;
+
 }
