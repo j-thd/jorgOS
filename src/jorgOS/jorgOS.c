@@ -61,6 +61,7 @@ void OS_delay(uint32_t ticks_delay){
     // A thread should can only be blocked for ONE reason at a time, so no
     // semaphores should be registered in the Thread Control Block.
     J_REQUIRE(OS_curr->blocking_sema == (void *)0);
+    J_REQUIRE(OS_curr->blocking_mutex == (void *)0);
     
     // OS_delay can only be called by the current thread.
     // Add the time-out timer to the current thread.
@@ -327,6 +328,18 @@ void OS_schedule(void){
     if (OS_next != OS_curr) {
         SCB->ICSR |=  SCB_ICSR_PENDSVSET_Msk; // Set the PendSV bit in the INTCTRL register of the SCB.
     }
+}
+
+/// @brief This checks whether the
+/// scheduler is working appropriately and not activating threads that should
+/// not be activated (delayed, or blocked by semaphores, mutex, etc..). This
+/// assert should always return true in a running thread.
+/// @param  
+/// @return [bool] Returns true if the Thread Control Block is as expected in a
+/// running thread.
+bool OS_assert_TCB_integrity(void){
+    return OS_curr->timeout == 0 && OS_curr->blocking_sema == (void *) 0\
+        && OS_curr->blocking_mutex == (void *)0;
 }
 
 void OS_Thread_start(

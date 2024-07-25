@@ -23,6 +23,7 @@ OS_Thread mutex_one_thread;
 void mutex_one(void){
     JSM_PRINTF("MUTEX ONE\n");
     while(1) {
+        J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(mutex_one_stack, MUTEX_ONE_STACKSIZE);
         JSM_PRINTF("Mutex one: Attempting to acquire mutex.\n");
         J_Mutex_acquire(&mutex_test);
@@ -43,6 +44,7 @@ OS_Thread mutex_two_thread;
 void mutex_two(void){
     JSM_PRINTF("MUTEX TWO\n");
     while(1) {
+        J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(mutex_two_stack, MUTEX_TWO_STACKSIZE);
         JSM_PRINTF("Mutex two: Attempting to acquire mutex.\n");
         J_Mutex_acquire(&mutex_test);
@@ -64,10 +66,11 @@ OS_Thread blinky_blue_thread;
 void blinky_blue(void){
     JSM_PRINTF("BLINKY BLUE\n");
     while(1) {
+        J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(blinky_blue_stack, BLINKY_BLUE_STACKSIZE);
-        GPIOF_AHB->DATA_BITS[(LED_BLUE)] = LED_BLUE;    
+        BSP_LED_blue_on();    
         OS_delay(3*BSP_TICKS_PER_SEC); 
-        GPIOF_AHB->DATA_BITS[(LED_BLUE)] = 0;
+        BSP_LED_blue_off();
         OS_delay(1*BSP_TICKS_PER_SEC); 
     }
 }
@@ -80,10 +83,11 @@ OS_Thread blinky_green_thread;
 void blinky_green(void){
     JSM_PRINTF("BLINKY GREEN\n");
     while(1) {
+        J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(blinky_green_stack, BLINKY_GREEN_STACKSIZE);
-        GPIOF_AHB->DATA_BITS[(LED_GREEN)] = LED_GREEN;    
+        BSP_LED_green_on();   
         OS_delay(BSP_TICKS_PER_SEC / 4U); 
-        GPIOF_AHB->DATA_BITS[(LED_GREEN)] = 0;
+        BSP_LED_green_off();
         OS_delay(BSP_TICKS_PER_SEC / 4U); 
     }
 }
@@ -97,15 +101,16 @@ OS_Thread sema_red_thread;
 void sema_red(void){
     JSM_PRINTF("SEMA RED\n");
     while (1) {
+        J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(sema_red_stack, SEMA_RED_STACKSIZE);
         // Blink briefly after the semaphore has been signaled.
         JSM_PRINTF("Sema_red waiting... \n");
-        GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
+        BSP_LED_red_on();
         J_sema_wait(&sema_test);
         JSM_PRINTF("Sema_red thread continues. \n");
         
         OS_delay(BSP_TICKS_PER_SEC*5U);
-        GPIOF_AHB->DATA_BITS[(LED_RED)] = 0;
+        BSP_LED_red_off();
 
     }
 }
@@ -119,6 +124,7 @@ OS_Thread sema_test_signal_thread;
 void sema_test_signal(void){
     JSM_PRINTF("SEMA TEST SIGNAL \n");
     while(1){
+        J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(sema_test_signal_stack, SEMA_TEST_SIGNAL_STACKSIZE);
         J_sema_signal(&sema_test);
         JSM_PRINTF("Sema test signaled... \n");

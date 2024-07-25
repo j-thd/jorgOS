@@ -68,3 +68,29 @@ void OS_onStartup(void){
     SystemCoreClockUpdate();
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 }
+
+// LED
+
+void BSP_LED_red_on(void){
+    GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
+}
+
+void BSP_LED_red_off(void){
+    GPIOF_AHB->DATA_BITS[(LED_RED)] = 0;
+}
+
+void BSP_LED_green_on(void){
+    GPIOF_AHB->DATA_BITS[(LED_GREEN)] = LED_GREEN;
+}
+
+void BSP_LED_green_off(void){
+    GPIOF_AHB->DATA_BITS[(LED_GREEN)] = 0;
+}
+
+void BSP_LED_blue_on(void){
+    GPIOF_AHB->DATA_BITS[(LED_BLUE)] = LED_BLUE;
+}
+
+void BSP_LED_blue_off(void){
+    GPIOF_AHB->DATA_BITS[(LED_BLUE)] = 0;
+}

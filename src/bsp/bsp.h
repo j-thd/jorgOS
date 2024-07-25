@@ -10,4 +10,16 @@
 
 void BSP_init(void);
 
+// LED
+void BSP_LED_red_off(void);
+void BSP_LED_red_on(void);
+void BSP_LED_green_off(void);
+void BSP_LED_green_on(void);
+void BSP_LED_blue_off(void);
+void BSP_LED_blue_on(void);
+
+// Switches
+void BSP_SW1_init(void);
+void BSP_SW2_init(void);
+
 #endif //__BSP_H_

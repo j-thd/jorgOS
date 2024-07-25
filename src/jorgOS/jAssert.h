@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "jorgOS.h"
 #include "jCritSec.h"
+
 
 
 
@@ -27,6 +29,7 @@
 // Thread integrity
 #define J_REQUIRE_ZERO_OR_ONE_BLOCKING_REASON(thread_) J_REQUIRE( ! (thread_->blocking_mutex != (void *)0 && thread_->blocking_sema != (void *)0 ))
 #define J_REQUIRE_ONE_BLOCKING_REASON(thread_) J_REQUIRE(  (thread_->blocking_mutex != (void *)0) != (thread_->blocking_sema != (void *)0 ))
+#define J_ASSERT_TCB_INTEGRITY J_ASSERT(OS_assert_TCB_integrity())
 
 //Dealing with assertions
 void J_assert_failed (char const *file, int line);

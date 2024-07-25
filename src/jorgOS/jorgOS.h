@@ -52,6 +52,10 @@ void OS_mutex_release(J_mutex *);
 void OS_onStartup(void);    // Callback function for when the OS-starts.
 void OS_onIdle(void);       // Callback function for the idle thread.
 
+// Assertions/integrity checks
+bool OS_assert_TCB_integrity(void); // Check if the Thread Control Block is correct at the start of a loop.
+
+
 void OS_Thread_start(
     OS_Thread *me, // Pointer to a struct containing the Thread Control Block
     uint8_t priority, 
