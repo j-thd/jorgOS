@@ -31,6 +31,15 @@
 #define J_REQUIRE_ONE_BLOCKING_REASON(thread_) J_REQUIRE(  (thread_->blocking_mutex != (void *)0) != (thread_->blocking_sema != (void *)0 ))
 #define J_ASSERT_TCB_INTEGRITY J_ASSERT(OS_assert_TCB_integrity())
 
+// EventQueue Threat integiry
+#define J_ASSERT_EVENTQUEUE_THREAD(thread_) \
+    J_REQUIRE(  OS_event_queue_set & (1U << (thread_->priority - 1) ) )
+#define J_ASSERT_NOT_EVENTQUEUE_THREAD(thread_) \
+    J_REQUIRE(  !(OS_event_queue_set & (1U << (thread_->priority - 1) )) )
+#define J_ASSERT_EVENTQUEUE_NOT_EMPTY(thread_) \
+    J_REQUIRE(!J_EventQueue_isEmpty( \
+        & ((OS_EventQueue_Thread*)thread_)->event_queue ))
+
 //Dealing with assertions
 void J_assert_failed (char const *file, int line);
 //Callback function that must be implemented by BSP package.

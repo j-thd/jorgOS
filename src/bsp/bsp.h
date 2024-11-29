@@ -4,7 +4,14 @@
 #define SYS_CLOCK_HZ 16000000U
 #define BSP_TICKS_PER_SEC 100U
 
-
+// Currently, each button is manually entered in a debounce procedure of bsp.c
+// and manually initialized in BSP_init()
+// The maximum is just used to have the appropriate size for call-back functions.
+// #define MAX_REGISTERED_BUTTONS 2
+// typedef void (*BSP_Button_Depressed_Handler);
+// typedef void (*BSP_Button_Released_Handler);
+// void BSP_register_button( uint8_t,
+//     BSP_Button_Depressed_Handler *, BSP_Button_Released_Handler * );
 
 void BSP_init(void);
 void BSP_tick(void);

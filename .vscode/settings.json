@@ -9,7 +9,13 @@
         "jorgos.h": "c",
         "stdio.h": "c",
         "system_tm4c123.h": "c",
-        "jassert.h": "c"
+        "jassert.h": "c",
+        "__bit_reference": "c",
+        "__split_buffer": "c",
+        "string": "c",
+        "vector": "c",
+        "jevent.h": "c",
+        "jeventqueuethread.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }

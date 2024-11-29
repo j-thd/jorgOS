@@ -4,6 +4,8 @@
 #include "jorgOS.h"
 #include "jAssert.h"
 #include "jCritSec.h"
+#include "jEventQueueThread.h"
+#include "jEvent.h"
 #include "runtime_environment.h"
 
 // Port should go here instead #include "runtime_environment.h"
@@ -28,7 +30,12 @@ OS_Thread *OS_thread_list[MAX_NUMBER_OF_THREADS];
 // A 32-bit mask for ready threads. Idle is always ready, and not in this bitmask
 uint32_t OS_ready_set;
 // A 32-bit mask holding the set of delayed threads. Threads can be delayed and NOT ready due to mutexes or stuff like that.
-uint32_t OS_delayed_set; 
+uint32_t OS_delayed_set;
+// A 32-bit mask holding the set of EventQueue_Threads. This is probably only
+// required for some stringent design-by-contract checking. Threads in this set
+// should never be blocked, so asserts can trip if mutexes, or delays are used
+// in those threads.
+uint32_t OS_event_queue_set;
 
 void main_idle_thread(void){
     while(1){
@@ -58,6 +65,8 @@ void OS_delay(uint32_t ticks_delay){
 
     // OS_delay must not be called in the idle thread.
     J_REQUIRE(OS_curr != OS_thread_list[0]);
+    // OS_delay cannot be balled in an EventQueuethread
+    J_ASSERT_NOT_EVENTQUEUE_THREAD(OS_curr);
     // A thread should can only be blocked for ONE reason at a time, so no
     // semaphores should be registered in the Thread Control Block.
     J_REQUIRE(OS_curr->blocking_sema == (void *)0);
@@ -83,9 +92,12 @@ void OS_delay(uint32_t ticks_delay){
 /// @param sema Pointer to the blocking semaphore (not null).
 void OS_sema_block(J_sema *sema){
     J_REQUIRE_IN_CRIT_SEC;
+    
     J_REQUIRE(sema != (void *)0);
     // OS_sema_block must not be called in the idle thread.
     J_REQUIRE(OS_curr != OS_thread_list[0]);
+    // Must not be called in an eventqueue thread
+    J_ASSERT_NOT_EVENTQUEUE_THREAD(OS_curr);
     // A thread should only be blocked for ONE reason at all times, so it should
     // not have a timer or be in the delayed set. Also, it should still be
     // ready-to-run.
@@ -103,6 +115,8 @@ void OS_sema_block(J_sema *sema){
 // Mutex functions
 void OS_mutex_acquire(J_mutex * mutex){
     J_REQUIRE_IN_CRIT_SEC;
+    // Must not be called in an eventqueue thread
+    J_ASSERT_NOT_EVENTQUEUE_THREAD(OS_curr);
     J_REQUIRE(mutex != (void*)0);
     //Mutex cannot be acquired again by the same thread.
     J_REQUIRE(mutex->owned_by != OS_curr); 
@@ -122,6 +136,8 @@ void OS_mutex_acquire(J_mutex * mutex){
 }
 void OS_mutex_release(J_mutex * mutex){
     J_REQUIRE_IN_CRIT_SEC;
+    // Must not be called in an eventqueue thread
+    J_ASSERT_NOT_EVENTQUEUE_THREAD(OS_curr);
     J_REQUIRE(mutex != (void*)0);
     // Mutex can only be released by the thread that acquired it, and it can of
     // course not be released when it is owned by no-one.
@@ -143,6 +159,7 @@ void OS_mutex_release(J_mutex * mutex){
 bool OS_is_blocked(OS_Thread * volatile thread){
     J_REQUIRE_IN_CRIT_SEC;
     J_REQUIRE(thread != (void*)0);
+
     // Check that the thread is only blocked for one reason.
     J_REQUIRE_ZERO_OR_ONE_BLOCKING_REASON(thread);
     // Since the asserts ensures only one blocking reason, we can safely do a
@@ -161,6 +178,9 @@ bool OS_is_blocked(OS_Thread * volatile thread){
 bool OS_check_for_ready(OS_Thread * volatile thread){
     J_REQUIRE_IN_CRIT_SEC;
     J_REQUIRE(thread != (void*)0);
+    // This check should never run on an eventqueue thread if the scheduler is
+    // working properly, as a ready eventqueue thread can never be blocked.
+    J_ASSERT_NOT_EVENTQUEUE_THREAD(thread);
     // Check that the thread is only blocked for one reason.
     J_REQUIRE_ONE_BLOCKING_REASON(thread);
     // Since the thread has been asserted to be blocked for one reason, we can
@@ -238,7 +258,7 @@ void OS_tick(void){
         // Reduce the timeout and unsit the bit in the working copy
         --thread->timeout;
         
-        priority_bit = thread->priority - 1U;
+        priority_bit = GET_PRIO_BIT(thread);
         // If the thread timeout hits 0, the thread is no longer delayed and ready to run
         if (thread->timeout == 0U){
             OS_ready_set |= 1U << priority_bit; // Set the thread to ready.
@@ -304,6 +324,9 @@ void OS_schedule(void){
             break;
         }
         else {
+            // If the thread is blocked, check it was not an eventqueue thread.
+            // That should enver happend
+            J_ASSERT_NOT_EVENTQUEUE_THREAD(OS_next);
             // If the thread is blocked, OS_check_for_ready can be called, which
             // will handle it based on the blocking reason (mutex or semaphore)
             if (OS_check_for_ready(OS_next)){
@@ -361,7 +384,7 @@ void OS_Thread_start(
                 
     // First the registers that will be pushed and popped on the scack by default (AAPCS standard!)
     *(--(sp)) =  (1U << 24); // Thumb bit set in xPSR
-    *(--(sp)) = (uint32_t)threadHandler; // Pointer to main_blinky1 in PC
+    *(--(sp)) = (uint32_t)threadHandler; // Pointer to thread in PC
     *(--(sp)) = 0x0EU; // LR
     *(--(sp)) = 0x0CU; // R12
     *(--(sp)) = 0x03U; // R3
@@ -409,8 +432,121 @@ void OS_Thread_start(
 
     // Initializing the semaphore pointer to 0;
     me->blocking_sema = (void *)0;
+    me->blocking_mutex = (void *)0;
 
 }
+
+/**************************************
+* J_EVENTQUEUE_THREAD 
+*/
+
+// This functionality mostly needs to be here because there's always small core
+// function of jorgOS.c that need to be accessed.
+
+/// @brief Start a special-purpose thread that does not but service an event queue at the given
+/// priority with respect to other (event queue) threads. 
+/// @param me pointer to the EventQueue Thread Control Block
+/// @param priority priority
+/// @param eventHandler pointer to OS_EventHandler for the Event Queue
+/// @param stack pointer to the stack of this thread
+/// @param stackSize size of the stack
+/// @param event_buffer pointer to the J_Event * buffer
+/// @param event_buffer_size size of the J_event buffer (in terms of elements
+/// and not bytes)
+
+void OS_EventQueue_Thread_start(
+    OS_EventQueue_Thread * me, // Pointer to EventQueue Specific TCB.
+    uint8_t priority, // Priority
+    // Instead of a thread handler an event handler. The OS_thread superclass
+    // will instead point to an internal thread handler.
+    OS_EventHandler eventHandler, 
+    uint32_t * stack,
+    uint32_t stackSize,
+    J_Event * event_buffer,
+    uint8_t event_buffer_size){
+
+    // OS_Thread_Start should already check the validity of all inputs but
+    // event_buffer and event_buffer_size, so let's skip that.
+    
+    J_ASSERT(event_buffer != (void *) 0); 
+    J_ASSERT(event_buffer_size > 1);
+    // Start a regular thread with the reguler OS_Thread superclass but using
+    // the special-purpose event pump which eventually dispatches events for
+    // each thread. 
+    OS_Thread_start((OS_Thread *)me, priority, &OS_EventQueue_pump, stack, stackSize);
+    // Assign the OS_Eventhandler
+    me->event_handler = eventHandler;
+
+    // This snippet here is the reason why this must be in this file. We want to
+    // set what type of thread this is. Also remember that OS_thread sets the
+    // thread to be ready to run, so it must actually be ready with the initial event.
+    OS_event_queue_set |= 1U << (priority-1);
+
+    // Initialize an EventQueue
+     J_EventQueue_init(&me->event_queue, event_buffer, event_buffer_size);
+    
+    // Post the initial event in the queue
+    J_Event e_init = {INIT_SIG};
+    J_EventQueue_put(&me->event_queue, e_init);
+}
+
+void OS_EventQueue_pump(void){
+    // Checks for the first time the event_queue runs.
+    // The current thread must be an 
+    J_ASSERT_EVENTQUEUE_THREAD(OS_curr);
+    // Check if an event handler is assigned
+    J_ASSERT( ((OS_EventQueue_Thread*)OS_curr)->event_handler != (void *)0 );
+    while(1){
+        J_ASSERT_TCB_INTEGRITY;
+        J_ASSERT_EVENTQUEUE_THREAD(OS_curr);
+        
+        // A critical section starts here, to make sure all event handling will
+        // be Run-To-Completion (RTC)
+        J_CRIT_SEC_START();
+
+        // The EventQueue_pump should never be running from the top when the
+        // event-queue is empty. So, while there could be a simply if-statement
+        // to check this, an immediate halt is preferred to prevent silent issues.
+        J_ASSERT_EVENTQUEUE_NOT_EMPTY(OS_curr);
+
+        // Three things need to be done. 
+        // * Dispatch the event to the OS_EventHandler,
+        // * Check if queue is now empty and set the thread to not ready if that
+        //   is the case.
+        // * Leave the critical section so the scheduler can potentially
+        //   intervene and swap priorities.
+        
+        // Get the pointer to the subclass once for convencience
+        OS_EventQueue_Thread * event_thread = (OS_EventQueue_Thread*)OS_curr;
+
+
+        // Dispatch event by calling event_handler
+        event_thread->event_handler(
+            J_EventQueue_get(&event_thread->event_queue) );
+        
+
+        // Check if queue is empty, and unready the thread if necessary
+        if ( J_EventQueue_isEmpty( &event_thread->event_queue ) ) {
+            // Unset the ready bit
+            OS_ready_set &= ~ (1U << (OS_curr->priority-1U) );
+            // If there is nothing to wrong, it is best to call the scheduler.
+            OS_schedule();
+        }
+
+        // The code was in a critical section to ensure Run-To-Completion.
+        J_CRIT_SEC_END();
+        // This is where the thread is guaranteed to switch if the queue was
+        // empty, because the scheduler was called. This means multiple events
+        // can be handled each time the thread is activated. The OS will also
+        // intervene here if the thread has been running longer a tick and
+        // another higher priority thread is ready now. This gives an
+        // interesting insight in my scheduler and event handling solution. I
+        // should not want the event handling to take longer than a tick so the
+        // priority-based scheduling keeps working in a timely manner.
+
+    }
+}
+
 
 __attribute__((naked)) void PendSV_Handler(void){
     // ASSEMBLY FOR THE CONTEXT SWITCH

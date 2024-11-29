@@ -3,6 +3,7 @@
 #include "TM4C123.h"
 #include "bsp.h"
 #include "jorgOS.h"
+#include "jEventQueueThread.h"
 #include "jAssert.h"
 #include "jSema.h"
 #include "jMutex.h"
@@ -133,6 +134,32 @@ void sema_test_signal(void){
     }
 }
 
+// Create an EventQueue Thread, which also needs to be passed a J_event buffer
+#define EVENT_TEST_STACKSIZE 100U
+#define PRIO_EVENT_TEST 4U
+#define EVENT_TEST_EVENT_BUFFER_SIZE 10U
+uint32_t event_test_stack[EVENT_TEST_STACKSIZE];
+OS_EventQueue_Thread event_test_eq_thread;
+J_Event event_test_event_buffer[EVENT_TEST_EVENT_BUFFER_SIZE];
+
+// The event handler
+
+void event_test_handler(J_Event e){
+    JSM_PRINTF("Event %i\n", e.sig);
+    JSM_transmit_buffer();
+    switch (e.sig)
+    {
+        
+    case INIT_SIG:
+        JSM_PRINTF("Event test: INIT SIG handled!\n");
+        break;
+    
+    default:
+        J_ERROR(); // Should not be reached.
+        break;
+    }
+}
+
 int main(void) {    
     
     BSP_init();
@@ -163,6 +190,11 @@ int main(void) {
 
     OS_Thread_start(&mutex_two_thread, PRIO_MUTEX_TWO, &mutex_two, 
         mutex_two_stack, sizeof(mutex_two_stack));    
+
+    // Event test threads
+    OS_EventQueue_Thread_start(&event_test_eq_thread, PRIO_EVENT_TEST, &event_test_handler,
+        event_test_stack, sizeof(event_test_stack), // Stack
+        event_test_event_buffer, EVENT_TEST_EVENT_BUFFER_SIZE); // EventQueue buffer
     OS_run();
 
     // After the first thread is scheduled, OS_run() should never return.

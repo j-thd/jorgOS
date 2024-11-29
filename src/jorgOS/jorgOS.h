@@ -9,10 +9,13 @@
 #include "jSema.h"
 #include "jMutex.h"
 
+
 // 32 normal threads plus the Idle Thread
 #define MAX_NUMBER_OF_THREADS 33
 // Macro to quickly ascertain index of most high-priority-thread ready to run
 #define THREAD_WITH_HIGHEST_PRIORITY(READY_SET) (32 - __CLZ(READY_SET))
+// Get the priority it based on the priority in the TCB
+#define GET_PRIO_BIT(thread_) (thread_->priority - 1U)
 
 // Forward declaration to resolve circular dependency with jMutex.h
 typedef struct J_mutex J_mutex;

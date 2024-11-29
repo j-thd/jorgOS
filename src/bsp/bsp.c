@@ -8,6 +8,11 @@
 
 #include <stdio.h>
 
+// Arrays to store callback functions for buttons
+// BSP_Button_Depressed_Handler btn_depressed_handlers[MAX_REGISTERED_BUTTONS];
+// BSP_Button_Released_Handler btn_release_handlers[MAX_REGISTERED_BUTTONS];
+
+
 void BSP_init(void){
     SYSCTL->RCGC2 |= (1U << 5); // Enable clock for GPIOF
     SYSCTL->GPIOHBCTL  |= (1U <<5); // Enable AHB for GPIOF
@@ -55,18 +60,22 @@ void BSP_tick(){
     if ( temp & SWITCH_1 ){ // Switch 1 state changed
         if (buttons.depressed & SWITCH_1){ // Switch 1 was pressed this tick
             JSM_PRINTF("Switch 1 pressed\n");
+            // TODO: Event-queue put goes here
         }
         else { // The switch was just released
             JSM_PRINTF("Switch 1 released\n");
+            // TODO: Event-queue put goes here
         }
     }
 
     if ( temp & SWITCH_2 ){ // Switch 1 state changed
         if (buttons.depressed & SWITCH_2){ // Switch 1 was pressed this tick
             JSM_PRINTF("Switch 2 pressed\n");
+            // TODO: Event-queue put goes here
         }
         else { // The switch was just released
             JSM_PRINTF("Switch 2 released\n");
+            // TODO: Event-queue put goes here
         }
     }
 
