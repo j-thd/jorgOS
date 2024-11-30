@@ -3,15 +3,14 @@
 #include "runtime_environment.h"
 #include "bsp.h"
 #include "jorgOS.h"
+#include "jEventQueueThread.h"
 #include "jAssert.h"
 #include "uart.h"
 
 #include <stdio.h>
 
-// Arrays to store callback functions for buttons
-// BSP_Button_Depressed_Handler btn_depressed_handlers[MAX_REGISTERED_BUTTONS];
-// BSP_Button_Released_Handler btn_release_handlers[MAX_REGISTERED_BUTTONS];
-
+// The jorgOS-specific function to handle events with.
+OS_EventQueue_Thread * BSP_EQT_thread;
 
 void BSP_init(void){
     SYSCTL->RCGC2 |= (1U << 5); // Enable clock for GPIOF
@@ -59,27 +58,36 @@ void BSP_tick(){
 
     if ( temp & SWITCH_1 ){ // Switch 1 state changed
         if (buttons.depressed & SWITCH_1){ // Switch 1 was pressed this tick
-            JSM_PRINTF("Switch 1 pressed\n");
-            // TODO: Event-queue put goes here
+            J_Event e = {BUTTON_1_DEPRESSED};
+            OS_EQT_post(BSP_EQT_thread, e);
+            //JSM_PRINTF("Switch 1 pressed\n");
         }
         else { // The switch was just released
-            JSM_PRINTF("Switch 1 released\n");
-            // TODO: Event-queue put goes here
+            J_Event e = {BUTTON_1_RELEASED};
+            OS_EQT_post(BSP_EQT_thread, e);
+            //JSM_PRINTF("Switch 1 released\n");
         }
     }
 
     if ( temp & SWITCH_2 ){ // Switch 1 state changed
-        if (buttons.depressed & SWITCH_2){ // Switch 1 was pressed this tick
-            JSM_PRINTF("Switch 2 pressed\n");
-            // TODO: Event-queue put goes here
+        if (buttons.depressed & SWITCH_2){ // Switch 2 was pressed this tick
+            J_Event e = {BUTTON_2_DEPRESSED};
+            OS_EQT_post(BSP_EQT_thread, e);
+            //JSM_PRINTF("Switch 2 pressed\n");
         }
         else { // The switch was just released
-            JSM_PRINTF("Switch 2 released\n");
-            // TODO: Event-queue put goes here
+            J_Event e = {BUTTON_2_RELEASED};
+            OS_EQT_post(BSP_EQT_thread, e);
+            //JSM_PRINTF("Switch 2 released\n");
         }
     }
 
 
+}
+
+void BSP_register_EQT_thread(OS_EventQueue_Thread * eqt_thread){
+    J_REQUIRE(eqt_thread != (void *)0);
+    BSP_EQT_thread = eqt_thread;
 }
 
 __attribute__((noreturn)) void J_on_assert_failed (char const *file, int line) {
@@ -104,11 +112,11 @@ __attribute__((noreturn)) void J_on_assert_failed (char const *file, int line) {
 void SysTick_Handler(void){
     //GPIOF_AHB->DATA_BITS[(LED_GREEN)] ^= LED_GREEN;
 
-    __disable_irq();
+    J_CRIT_SEC_START();
     OS_tick();
     BSP_tick();
     OS_schedule();
-    __enable_irq();
+    J_CRIT_SEC_END();
 }
 
 void OS_onIdle(void){

@@ -8,6 +8,7 @@
 #include "jSerialMonitor.h"
 #include "jSema.h"
 #include "jMutex.h"
+#include "jEventQueueThread.h"
 
 
 // 32 normal threads plus the Idle Thread
@@ -15,19 +16,12 @@
 // Macro to quickly ascertain index of most high-priority-thread ready to run
 #define THREAD_WITH_HIGHEST_PRIORITY(READY_SET) (32 - __CLZ(READY_SET))
 // Get the priority it based on the priority in the TCB
-#define GET_PRIO_BIT(thread_) (thread_->priority - 1U)
+#define GET_PRIO_BIT(thread_) ((thread_)->priority - 1U)
 
 // Forward declaration to resolve circular dependency with jMutex.h
 typedef struct J_mutex J_mutex;
 
-// Thread Control Block (TCB)
-typedef struct OS_Thread {
-    void *sp; // Stack pointer of the thread
-    uint32_t timeout; // Down-counter for the time-out delay during which the thread blocks
-    uint8_t priority; // Holds the priority of threads.
-    J_sema *blocking_sema; // Pointer to semaphore blocking the thread. Null pointer if not blocked by sema.
-    J_mutex *blocking_mutex; // Pointer to mutex blocking the thread. Null pointer if not blocked.
-} OS_Thread;
+
 
 typedef void (*OS_ThreadHandler)();
 
@@ -57,6 +51,9 @@ void OS_onIdle(void);       // Callback function for the idle thread.
 
 // Assertions/integrity checks
 bool OS_assert_TCB_integrity(void); // Check if the Thread Control Block is correct at the start of a loop.
+
+// Special EQT (EventQueue Thread) functionality
+void OS_set_EQT_to_ready(OS_EventQueue_Thread *);
 
 
 void OS_Thread_start(

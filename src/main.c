@@ -124,6 +124,7 @@ OS_Thread sema_test_signal_thread;
 // Dummy thread to signal a semaphore.
 void sema_test_signal(void){
     JSM_PRINTF("SEMA TEST SIGNAL \n");
+    JSM_transmit_buffer();
     while(1){
         J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(sema_test_signal_stack, SEMA_TEST_SIGNAL_STACKSIZE);
@@ -145,15 +146,56 @@ J_Event event_test_event_buffer[EVENT_TEST_EVENT_BUFFER_SIZE];
 // The event handler
 
 void event_test_handler(J_Event e){
-    JSM_PRINTF("Event %i\n", e.sig);
+    //JSM_PRINTF("Event %i\n", e.sig);
     JSM_transmit_buffer();
     switch (e.sig)
     {
         
     case INIT_SIG:
-        JSM_PRINTF("Event test: INIT SIG handled!\n");
+        JSM_PRINTF("EVENT TEST: INIT SIG handled!\n");
         break;
     
+    default:
+        J_ERROR(); // Should not be reached.
+        break;
+    }
+}
+
+// Create an EventQueue Thread solely for responding to events the BSP produces.
+#define BSP_EQT_STACKSIZE 100U
+#define PRIO_BSP_EQT 3U
+#define BSP_EQT_EVENT_BUFFER_SIZE 5U
+uint32_t bsp_eqt_stack[BSP_EQT_STACKSIZE];
+OS_EventQueue_Thread bsp_eqt_thread;
+J_Event bsp_eqt_event_buffer[BSP_EQT_EVENT_BUFFER_SIZE];
+
+// BSP event handler
+void bsp_event_handler(J_Event e){
+    //JSM_PRINTF("Event %i\n", e.sig);
+    JSM_transmit_buffer();
+    switch (e.sig)
+    {
+        
+    case INIT_SIG:
+        JSM_PRINTF("BSP EQT: INIT SIG handled!\n");
+        break;
+    
+    case BUTTON_1_DEPRESSED:
+        JSM_PRINTF("BUTTON 1 PRESSED\n");
+        break;
+
+    case BUTTON_1_RELEASED:
+        JSM_PRINTF("BUTTON 1 RELEASED\n");
+        break;
+
+    case BUTTON_2_DEPRESSED:
+        JSM_PRINTF("BUTTON 2 PRESSED\n");
+        break;
+
+    case BUTTON_2_RELEASED:
+        JSM_PRINTF("BUTTON 2 RELEASED\n");
+        break;
+
     default:
         J_ERROR(); // Should not be reached.
         break;
@@ -169,6 +211,13 @@ int main(void) {
     // Initialize semaphores and mutexes
     J_sema_init(&sema_test, 0, 1);
     J_Mutex_init(&mutex_test);
+
+    // Initialize the BSP event thread and register the thread to it, in which
+    // the BSP package can post events.
+    OS_EventQueue_Thread_start(&bsp_eqt_thread, PRIO_BSP_EQT, & bsp_event_handler,
+        bsp_eqt_stack, sizeof(bsp_eqt_stack),
+        bsp_eqt_event_buffer, BSP_EQT_EVENT_BUFFER_SIZE);
+    BSP_register_EQT_thread(&bsp_eqt_thread);
 
     // Blinky test threads
     OS_Thread_start(&blinky_blue_thread, PRIO_BLINKY_BLUE, &blinky_blue, 

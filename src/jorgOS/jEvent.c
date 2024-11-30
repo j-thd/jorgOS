@@ -46,8 +46,9 @@ J_Event J_EventQueue_get(J_EventQueue * jeq){
     J_REQUIRE (jeq->capacity != jeq->size && jeq->capacity < jeq->size);
     J_REQUIRE( jeq->head >= jeq->start && jeq->head <= jeq->end);
     J_REQUIRE( jeq->tail >= jeq->start && jeq->tail <= jeq->end);
-    // Update the head and capacity counter, as if an element was removed
-    // already. Of course, the element still needs to be returned.
+    // The pointer to the return value must first be retrieved if we want to avoid additional
+    // logic for what value to return, after moving the head.
+    J_Event e = *(jeq->head);
     ++jeq->head;
     ++jeq->capacity;
     // Reset the head to start if it moved past the end of the buffer.
@@ -56,8 +57,8 @@ J_Event J_EventQueue_get(J_EventQueue * jeq){
     }
     J_ENSURE( jeq->head >= jeq->start && jeq->head <= jeq->end );
     J_ENSURE( jeq->capacity <= jeq->size );
-    // The head was already moved, so subtract 1 from the pointer.
-    return *(jeq->head-1);
+    // The return value was taken before moving the head.
+    return e;
 }
 
 bool J_EventQueue_isEmpty(J_EventQueue * jeq){

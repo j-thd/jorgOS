@@ -1,20 +1,8 @@
 #ifndef __J_EVENTQUEUE_THREAD_H__
 #define __J_EVENTQUEUE_THREAD_H__
 
-#include "jorgOS.h"
+#include "jTCB.h"
 #include "jEvent.h"
-
-
-// EVENT-QUEUE THREADING FUNCTIONALITY
-/* EventQueue Threads are a special kind of thread that do event handling.
-*/
-
-
-
-
-
-
-
 
 // Instead of a thread an EventHandler taking J_Event pointers is necessary to
 // run the thread
@@ -50,6 +38,8 @@ void OS_EventQueue_pump(void);
 // Asserts/integrity checks on EventQueue thread
 bool OS_assert_not_EventQueue_thread(OS_Thread *);
 
+//  Posting events to the EQT (EventQueueThread)
+void OS_EQT_post(OS_EventQueue_Thread * , J_Event);
 
 
 #endif // __J_EVENTQUEUE_THREAD_H__

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "jorgOS.h"
+#include "jTCB.h"
 
 // Forward decleration needed here to break cyclical dependence of of jorgOS.h
 // and jMutex.H (OS_Thread and J_mutex)

@@ -547,6 +547,18 @@ void OS_EventQueue_pump(void){
     }
 }
 
+void OS_set_EQT_to_ready(OS_EventQueue_Thread * eqt_thread){
+    J_ASSERT( eqt_thread != (void *)0 );
+    // Compiler should check this already, but it doesn't hurt to constantly
+    // check if my OS is not screwing up
+    J_ASSERT_EVENTQUEUE_THREAD( (OS_Thread *)eqt_thread );
+    // I don't think there are race conditions, as unreadying only happens when
+    // in a critical section, but can't hurt to be sure. This is called in a
+    // critical section anyway.
+    J_REQUIRE_IN_CRIT_SEC;
+    OS_ready_set |= 1U << GET_PRIO_BIT((OS_Thread *)eqt_thread);
+    // That's it. Three asserts and one line of code. :P
+}
 
 __attribute__((naked)) void PendSV_Handler(void){
     // ASSEMBLY FOR THE CONTEXT SWITCH
