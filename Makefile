@@ -29,6 +29,16 @@ startup-code-object-files := $(startup-code-source-files:%=$(build-dir)/%.o)
 # Finally generate all the target object file names
 all-object-files := $(all-source-files:%=$(build-dir)/%.o) $(startup-code-object-files)
 
+## DEPENDENCY FILES
+# Dependency files are needed to make sure make recognizes changes to headers.
+# I thought I was being clever with the source-file-extentions above, but now I
+# need to filter for c object files, in order to find the dependency files that are
+# going to be generated. 
+
+# The next first filters for .c.o files and then turns them to .c.d. files.
+all-c-object-files := $(filter %c.o, $(all-object-files))
+all-dependency-files := $(all-c-object-files:.c.o=.c.d)
+
 ## TARGET FILES
 target-image := $(build-dir)/image/$(target-device).axf
 target-binary := $(build-dir)/image/$(target-device).bin
@@ -61,7 +71,6 @@ all: $(target-binary) $(target-image-info)
 .PHONY: flash
 flash: $(target-binary)
 	lmflash $^ -v -i ICDI 
-
 $(target-binary): $(target-image)
 	$(MKDIR) -p $(@D)
 	fromelf --bin -o $@ $^
@@ -78,12 +87,15 @@ $(target-image) : $(all-object-files)
 # Build all c-files
 $(build-dir)/%.c.o: %.c
 	$(MKDIR) -p $(@D)
-	armclang -c -g -std=c11 -D$(target-device) $(defs) --include-directory=$(inc_custom_cmsis) -I$(inc_arm_core_cmsis) $(inc_path_string) -D__MICROLIB  --target=arm-arm-none-eabi -mcpu=$(cpu) -mfpu=none -mfloat-abi=soft $< -o $@ 
+	armclang -MMD -c -g -std=c11 -D$(target-device) $(defs) --include-directory=$(inc_custom_cmsis) -I$(inc_arm_core_cmsis) $(inc_path_string) -D__MICROLIB  --target=arm-arm-none-eabi -mcpu=$(cpu) -mfpu=none -mfloat-abi=soft $< -o $@ 
+
+# Include all dependency files 
+-include $(all-dependency-files)
 
 # Build all assembly s-files
 $(build-dir)/%.s.o: %.s
 	$(MKDIR) -p $(@D)
-	armclang  -masm=auto -c -g -std=c11 -D$(target-device) --include-directory=$(inc_custom_cmsis) -I$(inc_arm_core_cmsis) -D:DEF:__MICROLIB --target=arm-arm-none-eabi -mcpu=$(cpu) -mfpu=none -mfloat-abi=soft $< -o $@ 
+	armclang -masm=auto -c -g -std=c11 -D$(target-device) --include-directory=$(inc_custom_cmsis) -I$(inc_arm_core_cmsis) -D:DEF:__MICROLIB --target=arm-arm-none-eabi -mcpu=$(cpu) -mfpu=none -mfloat-abi=soft $< -o $@ 
 
 #startup-code:$(wildcard $(startup-code)/*.s) $(wildcard $(startup-code)/*.c) 
 #	armclang -masm=auto -Wa,armasm,--diag_suppress=A1950W -c -g -D$(target-device) --include-directory=$(inc_custom_cmsis) -I$(inc_arm_core_cmsis) --target=arm-arm-none-eabi -mcpu=$(cpu) $?
@@ -92,9 +104,19 @@ $(build-dir)/%.s.o: %.s
 # Phony target for debugging.
 .PHONY: perp
 perp:
-	find $(source-dir) -type d
-	@echo $(all-source-files)
+#	find $(source-dir) -type d
+#	@echo $(all-source-wildcards)
+#	@echo $(all-source-files)
 	@echo $(all-object-files)
+
+	@echo $(all-c-object-files)
+
+	@echo $(all-dependency-files)
+
+# Testing dependency file creation
+.PHONY: dep
+dep:
+	armclang -c -MMD -g -std=c11 -D$(target-device) $(defs) --include-directory=$(inc_custom_cmsis) -I$(inc_arm_core_cmsis) $(inc_path_string) -D__MICROLIB  --target=arm-arm-none-eabi -mcpu=$(cpu) -mfpu=none -mfloat-abi=soft src/bsp/bsp.c -o bsp.test.o
 
 
 

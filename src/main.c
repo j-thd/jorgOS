@@ -69,9 +69,9 @@ void blinky_blue(void){
     while(1) {
         J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(blinky_blue_stack, BLINKY_BLUE_STACKSIZE);
-        BSP_LED_blue_on();    
+        //BSP_LED_blue_on();    
         OS_delay(3*BSP_TICKS_PER_SEC); 
-        BSP_LED_blue_off();
+        //BSP_LED_blue_off();
         OS_delay(1*BSP_TICKS_PER_SEC); 
     }
 }
@@ -86,10 +86,28 @@ void blinky_green(void){
     while(1) {
         J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(blinky_green_stack, BLINKY_GREEN_STACKSIZE);
-        BSP_LED_green_on();   
+        static uint8_t green_brightness = 0;
+        ++green_brightness;
+        //BSP_LED_set_color(0, green_brightness, 0);   
         OS_delay(BSP_TICKS_PER_SEC / 4U); 
-        BSP_LED_green_off();
-        OS_delay(BSP_TICKS_PER_SEC / 4U); 
+    }
+}
+
+#define BLINKY_CHANGE_STACKSIZE 100U
+#define PRIO_BLINKY_CHANGE 3U
+uint32_t blinky_change_stack[BLINKY_CHANGE_STACKSIZE];
+OS_Thread blinky_change_thread;
+
+void blinky_change(void){
+    JSM_PRINTF("BLINKY CHANGE\n");
+    while(1) {
+        J_ASSERT_TCB_INTEGRITY;
+        J_ASSERT_STACK_INTEGRITY(blinky_change_stack, BLINKY_CHANGE_STACKSIZE);
+        static uint8_t change_brightness = 0;
+        BSP_LED_red_on()   ;
+        OS_delay(BSP_TICKS_PER_SEC / 100U); 
+        BSP_LED_red_off()   ;
+        OS_delay(BSP_TICKS_PER_SEC / 100U); 
     }
 }
 
@@ -106,12 +124,12 @@ void sema_red(void){
         J_ASSERT_STACK_INTEGRITY(sema_red_stack, SEMA_RED_STACKSIZE);
         // Blink briefly after the semaphore has been signaled.
         JSM_PRINTF("Sema_red waiting... \n");
-        BSP_LED_red_on();
+        //BSP_LED_red_on();
         J_sema_wait(&sema_test);
         JSM_PRINTF("Sema_red thread continues. \n");
         
         OS_delay(BSP_TICKS_PER_SEC*5U);
-        BSP_LED_red_off();
+        //BSP_LED_red_off();
 
     }
 }
@@ -128,9 +146,10 @@ void sema_test_signal(void){
     while(1){
         J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(sema_test_signal_stack, SEMA_TEST_SIGNAL_STACKSIZE);
+        JSM_PRINTF("Sema test about to be  signaled... \n");
         J_sema_signal(&sema_test);
-        JSM_PRINTF("Sema test signaled... \n");
-        OS_delay(BSP_TICKS_PER_SEC*7U); // Wait longer than the sema_red threads sleeps.
+        
+        OS_delay(BSP_TICKS_PER_SEC*15U); // Wait longer than the sema_red threads sleeps.
 
     }
 }
@@ -163,7 +182,7 @@ void event_test_handler(J_Event e){
 
 // Create an EventQueue Thread solely for responding to events the BSP produces.
 #define BSP_EQT_STACKSIZE 100U
-#define PRIO_BSP_EQT 3U
+#define PRIO_BSP_EQT 17U
 #define BSP_EQT_EVENT_BUFFER_SIZE 5U
 uint32_t bsp_eqt_stack[BSP_EQT_STACKSIZE];
 OS_EventQueue_Thread bsp_eqt_thread;
@@ -181,6 +200,8 @@ void bsp_event_handler(J_Event e){
         break;
     
     case BUTTON_1_DEPRESSED:
+        // Testing the semaphore.
+        J_sema_signal(&sema_test);
         JSM_PRINTF("BUTTON 1 PRESSED\n");
         break;
 
@@ -205,11 +226,12 @@ void bsp_event_handler(J_Event e){
 int main(void) {    
     
     BSP_init();
+    //BSP_LED_set_color(0,10,10);
 
     OS_init();
 
     // Initialize semaphores and mutexes
-    J_sema_init(&sema_test, 0, 1);
+    J_sema_init(&sema_test, 0, 10);
     J_Mutex_init(&mutex_test);
 
     // Initialize the BSP event thread and register the thread to it, in which
@@ -225,6 +247,9 @@ int main(void) {
     
     OS_Thread_start(&blinky_green_thread, PRIO_BLINKY_GREEN, &blinky_green, 
         blinky_green_stack, sizeof(blinky_green_stack));
+    
+    OS_Thread_start(&blinky_change_thread, PRIO_BLINKY_CHANGE, &blinky_change, 
+        blinky_change_stack, sizeof(blinky_change_stack));
 
     // Sema test threads
     OS_Thread_start(&sema_red_thread, PRIO_SEMA_RED, &sema_red, 
