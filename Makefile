@@ -55,9 +55,10 @@ MKDIR ?= $(shell where mkdir)
 inc_custom_cmsis := C:\code\custom-cmsis
 inc_arm_core_cmsis := C:\code\custom-cmsis\CMSIS-arm-default\Core\Include
 inc_bsp := ./src/bsp
+inc_jlib = ./src/jlib
 inc_runtime_environment := ./src/runtime_environment
 inc_os := ./src/jorgOS
-INC_PATH := $(inc_bsp) $(inc_runtime_environment) $(inc_os)
+INC_PATH := $(inc_bsp) $(inc_jlib) $(inc_runtime_environment) $(inc_os)
 inc_path_string := $(addprefix -I, $(INC_PATH))
 
 # Definitions to pass to compiler
@@ -106,12 +107,13 @@ $(build-dir)/%.s.o: %.s
 perp:
 #	find $(source-dir) -type d
 #	@echo $(all-source-wildcards)
-#	@echo $(all-source-files)
-	@echo $(all-object-files)
+	@echo $(sub-source-dirs)
+	@echo $(all-source-files)
+#	@echo $(all-object-files)
 
-	@echo $(all-c-object-files)
+#	@echo $(all-c-object-files)
 
-	@echo $(all-dependency-files)
+#	@echo $(all-dependency-files)
 
 # Testing dependency file creation
 .PHONY: dep

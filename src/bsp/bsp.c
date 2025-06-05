@@ -2,6 +2,7 @@
 
 #include "runtime_environment.h"
 #include "bsp.h"
+#include "bsp_led.h"
 #include "jorgOS.h"
 #include "jEventQueueThread.h"
 #include "jAssert.h"
@@ -145,71 +146,6 @@ void OS_onStartup(void){
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 }
 
-// LED
-// Store the set colors for the LED
-uint8_t BSP_LED_red = 0;
-uint8_t BSP_LED_green = 0;
-uint8_t BSP_LED_blue = 0;
-// Use this 8-bit "clock" to update the colours
-uint8_t BSP_LED_clock = 0;
-
-void BSP_LED_set_color(uint8_t red, uint8_t green, uint8_t blue){
-    BSP_LED_red = red;
-    BSP_LED_green = green;
-    BSP_LED_blue = blue;
-}
-void BSP_LED_update(void){
-    ++BSP_LED_clock;
-
-    // Update red LED
-    if( BSP_LED_red+1 > BSP_LED_clock ){
-        BSP_LED_red_on();
-    }
-    else {
-        BSP_LED_red_off();
-    }
-    
-    // Update green LED
-    if( BSP_LED_green+1 > BSP_LED_clock ){
-        BSP_LED_green_on();
-    }
-    else {
-        BSP_LED_green_off();
-    }
-    
-    // Update blue LED
-    if( BSP_LED_blue+1 > BSP_LED_clock ){
-        BSP_LED_blue_on();
-    }
-    else {
-        BSP_LED_blue_off();
-    }
-
-}
-
-void BSP_LED_red_on(void){
-    GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
-}
-
-void BSP_LED_red_off(void){
-    GPIOF_AHB->DATA_BITS[(LED_RED)] = 0;
-}
-
-void BSP_LED_green_on(void){
-    GPIOF_AHB->DATA_BITS[(LED_GREEN)] = LED_GREEN;
-}
-
-void BSP_LED_green_off(void){
-    GPIOF_AHB->DATA_BITS[(LED_GREEN)] = 0;
-}
-
-void BSP_LED_blue_on(void){
-    GPIOF_AHB->DATA_BITS[(LED_BLUE)] = LED_BLUE;
-}
-
-void BSP_LED_blue_off(void){
-    GPIOF_AHB->DATA_BITS[(LED_BLUE)] = 0;
-}
 
 // Switches
 void BSP_SWITCH_1_init(void){

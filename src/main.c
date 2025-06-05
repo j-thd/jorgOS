@@ -2,6 +2,7 @@
 
 #include "TM4C123.h"
 #include "bsp.h"
+#include "bsp_led.h"
 #include "jorgOS.h"
 #include "jEventQueueThread.h"
 #include "jAssert.h"

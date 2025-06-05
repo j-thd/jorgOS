@@ -15,7 +15,13 @@
         "string": "c",
         "vector": "c",
         "jevent.h": "c",
-        "jeventqueuethread.h": "c"
+        "jeventqueuethread.h": "c",
+        "__config": "cpp",
+        "locale": "cpp",
+        "jfp.h": "c",
+        "bsp_led.h": "c",
+        "jtest.h": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": false
+    "cortex-debug.variableUseNaturalFormat": false,
+    "makefile.configureOnOpen": false
 }
