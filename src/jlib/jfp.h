@@ -20,7 +20,7 @@ typedef int16_t SFP_10_5;
 
 SFP_10_5 SFP_10_5_new_F(float);
 SFP_10_5 SFP_10_5_new_D(double);
-SFP_10_5 SFP_10_5_mul(SFP_10_5, SFP_10_5);
-SFP_10_5 SFP_10_5_div(SFP_10_5, SFP_10_5);
-SFP_10_5 SFP_10_5_mod(SFP_10_5, SFP_10_5);
+// SFP_10_5 SFP_10_5_mul(SFP_10_5, SFP_10_5);
+// SFP_10_5 SFP_10_5_div(SFP_10_5, SFP_10_5);
+// SFP_10_5 SFP_10_5_mod(SFP_10_5, SFP_10_5);
 

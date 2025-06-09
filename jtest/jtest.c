@@ -25,6 +25,8 @@ int run_test_on_target(void){
 #ifdef JTEST_HOST
 int run_test_on_host(void){
     printf("\n\t JTEST started in HOST mode\n\n");
+    printf("TEST STARTED: %s\n", JT_test_file_);
+    printf("-------------");
     JTEST_run_test();
 
     return 0;
