@@ -7,7 +7,8 @@
 // Make some variables accessible from test-code
 // Bit of a nasty solution, but I want the test-code to look nicer bracket-wise,
 // and this does the trick for now. :)
-extern uint16_t count;
+extern uint16_t JT_count;
+extern bool JT_tests_failed;
 
 
 // FUNCTIONS RUNNING THE TESTS
@@ -31,7 +32,7 @@ int JTEST_run_on_target(void){
     printf("TEST FILE loaded: %s\n", JT_test_file_);
     printf("--------------------------------------\n");
     JTEST_run_tests();
-    JTEST_end_of_test(count, false);
+    JTEST_end_of_test(JT_count, false);
 
     return 0;
 }
@@ -43,7 +44,14 @@ int JTEST_run_on_host(void){
     printf("TEST FILE loaded: %s\n", JT_test_file_);
     printf("--------------------------------------\n");
     JTEST_run_tests();
-    JTEST_end_of_test(count, false);
+
+    
+    // Only print the PASS at the end of the last tests if it was succesful.
+    // This code may seem odd here, but it makes the test suite look nicer at
+    // the cost of having to call the end of the test at strange places.
+    if (!JT_tests_failed){
+        JTEST_end_of_test(JT_count, false);
+    }
 
     return 0;
 }
@@ -54,11 +62,11 @@ int JTEST_run_on_host(void){
 /// This is to make the test macros look nicer. On first_call it should print
 /// nothing. Finally, it is called at the end of the JT_TESTS block to print the
 /// result of the last test.
-/// @param count 
+/// @param JT_count 
 /// @param first_call 
 /// @return 
-void JTEST_end_of_test(uint16_t count, bool first_call){
+void JTEST_end_of_test(uint16_t JT_count, bool first_call){
     if (!first_call){
-         printf("-> PASS\n\t\t %u checks completed.\n", count);
+         printf("-> PASS\n\t\t %u checks completed.\n", JT_count);
     }
 }

@@ -178,6 +178,7 @@ all-host-source-dirs = $(jlib-source-dir) $(jtest-source-dir)
 host-source-file-extensions = c
 all-host-source-wildcards := $(foreach var,$(host-source-file-extensions), $(addsuffix /*.$(var),$(all-host-source-dirs)))
 all-host-source-files := $(wildcard $(all-host-source-wildcards)) $(c-test-source-file)
+c-test-dependency-file := $(c-test-source-file:.c=.c.d)
 
 # The host (at least with GCC) cannot test any ARM-specific assembly, so these
 # things must not be included. A specific inclusion string must be made for host
@@ -188,17 +189,23 @@ host-inc-paths-string = $(addprefix -I, $(host-inc-paths))
 
 
 host-binary := $(build-dir)/host-binary/$(target-device)/tests_fixed_point.exe # <template here>
+host-binary-dependency-file := $(host-binary:.exe=.d)
+
+-include $(host-binary-dependency-file)
+
 
 .PHONY: host-test
 host-test: $(host-binary)
 	$(host-binary)
+
+
 
 $(host-binary): defs = $(common-defs) -DJTEST_HOST
 $(host-binary): $(all-host-source-files)
 	$(MKDIR) -p $(@D)
 	gcc --version
 	gcc --help
-	gcc  -o $@ $^ $(defs) $(host-inc-paths-string)
+	gcc -MMD  -o $@ $^ $(defs) $(host-inc-paths-string)
 
 
 
@@ -206,6 +213,7 @@ $(host-binary): $(all-host-source-files)
 perp:
 	where gcc
 	@echo $(all-host-source-files)
+	@echo $(host-binary-dependency-file)
 	@echo $(all-host-source-dirs)	
 	@echo $(all-host-object-files)
 	@echo $(host-inc-paths-string)
