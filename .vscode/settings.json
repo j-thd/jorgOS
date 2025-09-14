@@ -20,7 +20,8 @@
         "locale": "cpp",
         "jfp.h": "c",
         "bsp_led.h": "c",
-        "jtest.h": "c"
+        "jtest.h": "c",
+        "cstdlib": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false,
     "makefile.configureOnOpen": false

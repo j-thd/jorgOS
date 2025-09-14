@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "bsp_led.h"
+#include "jfp.h"
 
 // LED
 // Store the set colors for the LED
@@ -19,12 +20,33 @@ void BSP_LED_set_color(uint8_t red, uint8_t green, uint8_t blue){
 
 
 
-BSP_RGB_colour BSP_LED_RGB_from_HSL(uint16_t hue, uint16_t sat, uint16_t lightness){
+BSP_RGB_colour BSP_LED_RGB_from_HSL(uint16_t hue, SFP_10_5 sat, SFP_10_5 lightness){
     // FROM https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
 
     // TODO: set bounds on HSL variables (for fixed point-arithmetic)
-    #define FP_1 1000
-    int16_t chroma = (FP_1  - abs(2*lightness - FP_1)) * sat; 
+    
+
+    
+    SFP_10_5 chroma = SFP_10_5_MULT(SFP_10_5_ONE  - abs(lightness>>1 - SFP_10_5_ONE), sat, 0 ,0 );
+    // Hue dash should still be a float, so a constant of 1/60 is needed in
+    // SFP_10_5.
+    // I'm assuming that if I simply declare the constant once, it will be optimized
+    // and not calculated every time. I should check this in the assembly at
+    // some point.
+    const SFP_10_5 reciprocal_of_60 = SFP_10_5_new_F(1/60.0f);
+    uint16_t hue_dash = hue * reciprocal_of_60;
+
+    SFP_10_5 X = SFP_10_5_MULT(
+        chroma,
+        (SFP_10_5_ONE - abs(SFP_10_5_MOD_2(hue_dash) - SFP_10_5_ONE)),
+        0,
+        0
+    );
+
+    // Calculate R_1, G_1, B_1 based on hue_dash.
+    // TODO: implement a function to do this with BSP_RGB_colour being used for
+    // testability.
+    
 
     // TODO: Return actual result
     BSP_RGB_colour res = {

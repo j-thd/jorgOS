@@ -41,6 +41,10 @@ typedef int16_t SFP_10_5;
     ( ( x_ >> x_pre_shift_ ) * ( y_  >> y_pre_shift_ ) \
      >> SFP_10_5_SHIFT - x_pre_shift_ - y_pre_shift_ )
 
+
+// Mod 2 should be the same as doing x % (2<<SFP_10_5_SHIFT)
+#define SFP_10_5_MOD_2(x_) (x_ % (2 << SFP_10_5_SHIFT) ) 
+
 SFP_10_5 SFP_10_5_new_F(float);
 SFP_10_5 SFP_10_5_new_D(double);
 // SFP_10_5 SFP_10_5_mul(SFP_10_5, SFP_10_5);

@@ -60,7 +60,7 @@ JT_TEST("Multiplication checks"){
     JT_ASSERT(
         SFP_10_5_MULT( four, quarter, 0, 0) == SFP_10_5_ONE
     );
-    // Check the epsilon behaviour, for all x_preshifts
+    // Check the epsilon behaviour, for all x_preshifts and y_preshifts
     SFP_10_5 eps = FLOAT_TO_SFP_10_5(SFP_10_5_EPSILON);
     JT_ASSERT(
         SFP_10_5_MULT( SFP_10_5_ONE, eps, 0, 0) == eps
@@ -77,6 +77,94 @@ JT_TEST("Multiplication checks"){
     JT_ASSERT(
         SFP_10_5_MULT( SFP_10_5_ONE, eps, 4, 0) == eps
     );
+    JT_ASSERT(
+        SFP_10_5_MULT( eps, SFP_10_5_ONE, 0, 0) == eps
+    );
+    JT_ASSERT(
+        SFP_10_5_MULT( eps, SFP_10_5_ONE, 0, 1) == eps
+    );
+    JT_ASSERT(
+        SFP_10_5_MULT( eps, SFP_10_5_ONE, 0, 2) == eps
+    );
+    JT_ASSERT(
+        SFP_10_5_MULT( eps, SFP_10_5_ONE, 0, 3) == eps
+    );
+    JT_ASSERT(
+        SFP_10_5_MULT( eps, SFP_10_5_ONE, 0, 4) == eps
+    );
+    JT_ASSERT(
+        SFP_10_5_MULT( eps, SFP_10_5_ONE, 0, 5) == eps
+    );
+
+    // +512 is the limit of the SFP.
+    SFP_10_5 a  = FLOAT_TO_SFP_10_5(16);
+    SFP_10_5 b  = FLOAT_TO_SFP_10_5(32);
+    SFP_10_5 c = FLOAT_TO_SFP_10_5(512);
+    SFP_10_5 d  = FLOAT_TO_SFP_10_5(-16);
+    SFP_10_5 e = FLOAT_TO_SFP_10_5(-512);
+    SFP_10_5 f = FLOAT_TO_SFP_10_5(256);
+    
+    JT_ASSERT(
+        SFP_10_5_MULT( a, b, 0, 0) == c
+    );
+    JT_ASSERT(
+        SFP_10_5_MULT( a, b, 2, 3) == c
+    );
+
+    JT_ASSERT(
+        SFP_10_5_MULT( d, b, 0, 0) == e
+    );
+    JT_ASSERT(
+        SFP_10_5_MULT(d, d, 0, 0) == f
+    );
+
+
+}
+
+JT_TEST("Modulo 2 / remainder checks"){
+    JT_ASSERT(SFP_10_5_ONE == SFP_10_5_MOD_2(SFP_10_5_ONE));
+
+    // Check zero, one, minus one inputs
+    SFP_10_5 zero  = FLOAT_TO_SFP_10_5(0);
+    JT_ASSERT(SFP_10_5_MOD_2(zero) == zero);
+
+    SFP_10_5 one  = FLOAT_TO_SFP_10_5(1);
+    JT_ASSERT(SFP_10_5_MOD_2(one) == one);
+
+    SFP_10_5 minus_one  = FLOAT_TO_SFP_10_5(-1);
+    JT_ASSERT(SFP_10_5_MOD_2(minus_one) == minus_one);
+    
+    // Basic checks with integers, and negative values.
+    SFP_10_5 a  = FLOAT_TO_SFP_10_5(16);
+    SFP_10_5 b = FLOAT_TO_SFP_10_5(0);
+    JT_ASSERT(SFP_10_5_MOD_2(a) == b);
+
+    SFP_10_5 c  = FLOAT_TO_SFP_10_5(17);
+    SFP_10_5 d = FLOAT_TO_SFP_10_5(1);
+    JT_ASSERT(SFP_10_5_MOD_2(c) == d);
+
+    SFP_10_5 e  = FLOAT_TO_SFP_10_5(-32);
+    SFP_10_5 f = FLOAT_TO_SFP_10_5(0);
+    JT_ASSERT(SFP_10_5_MOD_2(e) == f);
+
+    SFP_10_5 g  = FLOAT_TO_SFP_10_5(-15);
+    SFP_10_5 h = FLOAT_TO_SFP_10_5(-1);
+    JT_ASSERT(SFP_10_5_MOD_2(g) == h);
+
+
+    // Checking floats
+    SFP_10_5 i = FLOAT_TO_SFP_10_5(0.5f);
+    JT_ASSERT( SFP_10_5_MOD_2(i) == (SFP_10_5_ONE*0.5f)) ;
+
+    SFP_10_5 j = FLOAT_TO_SFP_10_5(-32.125f);
+    JT_ASSERT( SFP_10_5_MOD_2(j) == (SFP_10_5_ONE*-0.125f)) ;
+
+    // Checking upper and lower bounds
+    SFP_10_5 k = FLOAT_TO_SFP_10_5(512);
+    JT_ASSERT( SFP_10_5_MOD_2(k) == 0) ;
+
+    SFP_10_5 l = FLOAT_TO_SFP_10_5(-512);
+    JT_ASSERT( SFP_10_5_MOD_2(l) == 0) ;
 }
 
 }
