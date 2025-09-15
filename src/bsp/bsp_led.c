@@ -20,7 +20,7 @@ void BSP_LED_set_color(uint8_t red, uint8_t green, uint8_t blue){
 
 
 
-BSP_RGB_colour BSP_LED_RGB_from_HSL(uint16_t hue, SFP_10_5 sat, SFP_10_5 lightness){
+BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_10_5 hue, SFP_10_5 sat, SFP_10_5 lightness){
     // FROM https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
 
     // TODO: set bounds on HSL variables (for fixed point-arithmetic)
@@ -34,7 +34,12 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(uint16_t hue, SFP_10_5 sat, SFP_10_5 lightne
     // and not calculated every time. I should check this in the assembly at
     // some point.
     const SFP_10_5 reciprocal_of_60 = SFP_10_5_new_F(1/60.0f);
-    uint16_t hue_dash = hue * reciprocal_of_60;
+    SFP_10_5 hue_dash = SFP_10_5_MULT(
+        hue,
+        reciprocal_of_60,
+        0,
+        0
+    );
 
     SFP_10_5 X = SFP_10_5_MULT(
         chroma,
@@ -42,6 +47,11 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(uint16_t hue, SFP_10_5 sat, SFP_10_5 lightne
         0,
         0
     );
+
+    SFP_10_5 R,G,B;
+    
+
+
 
     // Calculate R_1, G_1, B_1 based on hue_dash.
     // TODO: implement a function to do this with BSP_RGB_colour being used for

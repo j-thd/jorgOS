@@ -11,7 +11,7 @@ JT_TEST("Assert test"){
     
 
 }
-JT_TEST("Conversion checks"){
+JT_TEST("Float Conversion checks"){
     // Checking whether the epsilon converts to itself
     JT_ASSERT(
         SFP_10_5_TO_FLOAT(SFP_10_5_ONE*SFP_10_5_EPSILON) == SFP_10_5_EPSILON);
@@ -46,6 +46,25 @@ JT_TEST("Conversion checks"){
 
 
 
+}
+
+JT_TEST("Int conversion checks"){
+    // The same behavior as (int)float_value is is expected.
+    
+    // +512 is the limit of the SFP.
+    SFP_10_5 a = FLOAT_TO_SFP_10_5(16.0f-SFP_10_5_EPSILON);
+    SFP_10_5 b = FLOAT_TO_SFP_10_5(16.0f-0.00000000001*SFP_10_5_EPSILON);
+    SFP_10_5 c = FLOAT_TO_SFP_10_5(511.7);
+    SFP_10_5 d = FLOAT_TO_SFP_10_5(-16);
+    SFP_10_5 e = FLOAT_TO_SFP_10_5(-512);
+    SFP_10_5 f = FLOAT_TO_SFP_10_5(0.0f);
+
+    JT_ASSERT(SFP_10_5_TO_INT(a) == 15);
+    JT_ASSERT(SFP_10_5_TO_INT(b) == 15);
+    JT_ASSERT(SFP_10_5_TO_INT(c) == 511);
+    JT_ASSERT(SFP_10_5_TO_INT(d) == -16);
+    JT_ASSERT(SFP_10_5_TO_INT(e) == -512);
+    JT_ASSERT(SFP_10_5_TO_INT(f) == 0);
 }
 
 JT_TEST("Multiplication checks"){

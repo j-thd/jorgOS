@@ -17,6 +17,7 @@ typedef int16_t SFP_10_5;
 #define FLOAT_TO_SFP_10_5(f_) ((SFP_10_5)(SFP_10_5_ONE * f_))
 
 #define SFP_10_5_TO_FLOAT(sfp_) ((float)(sfp_) / SFP_10_5_ONE)
+#define SFP_10_5_TO_INT(sfp_) ((int)(sfp_) / SFP_10_5_ONE)
 #define SFP_10_5_EPSILON 0.03125f
 // DBG_NEAR_EQUAL is just intended for testing and debugging, and actually
 // compares floats
