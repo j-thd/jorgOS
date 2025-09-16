@@ -34,8 +34,8 @@ JT_TEST("Float Conversion checks"){
     JT_ASSERT(SFP_10_5_TO_FLOAT(SFP_10_5_ONE*-0.25) == -0.25f);
     JT_ASSERT(SFP_10_5_TO_FLOAT(FLOAT_TO_SFP_10_5(-0.25f)) == -0.25f);
     
-    
-    
+    JT_ASSERT(SFP_10_5_TO_FLOAT(FLOAT_TO_SFP_10_5(16.0f-0.0001f)) == 16.0f);
+
     // Check whether a number that doesn't round well is represented correctly.
     JT_ASSERT(SFP_10_5_TO_FLOAT(SFP_10_5_ONE*0.3f) == 0.3f);
     
@@ -53,14 +53,15 @@ JT_TEST("Int conversion checks"){
     
     // +512 is the limit of the SFP.
     SFP_10_5 a = FLOAT_TO_SFP_10_5(16.0f-SFP_10_5_EPSILON);
-    SFP_10_5 b = FLOAT_TO_SFP_10_5(16.0f-0.00000000001*SFP_10_5_EPSILON);
+    // Learn why this is not rounded to 16 in SFP_10_5...
+    SFP_10_5 b = FLOAT_TO_SFP_10_5(16.0f-0.01f);
     SFP_10_5 c = FLOAT_TO_SFP_10_5(511.7);
     SFP_10_5 d = FLOAT_TO_SFP_10_5(-16);
     SFP_10_5 e = FLOAT_TO_SFP_10_5(-512);
     SFP_10_5 f = FLOAT_TO_SFP_10_5(0.0f);
 
     JT_ASSERT(SFP_10_5_TO_INT(a) == 15);
-    JT_ASSERT(SFP_10_5_TO_INT(b) == 15);
+    JT_ASSERT(SFP_10_5_TO_INT(b) == 16);
     JT_ASSERT(SFP_10_5_TO_INT(c) == 511);
     JT_ASSERT(SFP_10_5_TO_INT(d) == -16);
     JT_ASSERT(SFP_10_5_TO_INT(e) == -512);

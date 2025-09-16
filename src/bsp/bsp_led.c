@@ -2,6 +2,7 @@
 
 #include "bsp_led.h"
 #include "jfp.h"
+#include "jAssert.h"
 
 // LED
 // Store the set colors for the LED
@@ -48,8 +49,49 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_10_5 hue, SFP_10_5 sat, SFP_10_5 lightne
         0
     );
 
-    SFP_10_5 R,G,B;
     
+    // Instead of doing 6 comparisons with floats, hue_dash can also be cast to
+    // an int, instead.
+    uint8_t hdi = SFP_10_5_TO_INT(hue_dash);
+    SFP_10_5 R,G,B;
+
+    switch(hdi){
+        case 0:
+            R = chroma;
+            G = X;
+            B = 0;
+
+        case 1:
+            R = X;
+            G = chroma;
+            B = 0;
+
+        case 2:
+            R = 0;
+            G = chroma;
+            B = X;
+
+        case 3:
+            R = 0;
+            G = X;
+            B = chroma;
+
+        case 4:
+            R = X;
+            G = 0;
+            B = chroma;
+
+        case 5:
+            R = chroma;
+            G = 0;
+            B = X;
+
+        default:
+            // The default case should never be reached.
+            J_ERROR();
+
+    }
+
 
 
 
