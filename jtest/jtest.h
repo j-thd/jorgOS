@@ -10,6 +10,9 @@ int JTEST_run_on_target(void);
 int JTEST_run_on_host(void);
 void JTEST_end_of_test(uint16_t JT_count, bool first_call);
 
+// Call-back functions for target initilization
+void JTEST_init_target(void);
+
 // Actual functions doing the tests
 void JT_assert(bool);
 

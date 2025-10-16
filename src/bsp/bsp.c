@@ -7,6 +7,7 @@
 #include "jEventQueueThread.h"
 #include "jAssert.h"
 #include "uart.h"
+#include "jtest.h"
 
 #include <stdio.h>
 
@@ -232,4 +233,10 @@ void BSP_LED_PWM_init(void){
         // Loop around to test the LED behaviour :)
     }
 
+}
+
+void JTEST_init_target(){
+    // Function called by JTEST to allow the target to define how it must be
+    // initialized.
+        BSP_init();
 }

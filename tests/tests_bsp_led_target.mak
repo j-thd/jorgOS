@@ -48,11 +48,11 @@ all-source-dirs := $(sub-source-dirs) $(test-tools-source-files)
 # Start with the test file (c is assumned). Is a single source file okay?
 # Perhaps it matters relative to what path the test file is given? Not sure what
 # will we be more convenient. Let's assume the root folder for now
-#tmpl:  everywhere "tests_fixed_point" occurs it should be replaced with a
+#tmpl:  everywhere "tests_bsp_led" occurs it should be replaced with a
 #       variable. preferably this includes the path? Eventually we can end up
 #       with all source files just being build once, instead of multiple times
 #       for each tests, with binaries and images for each different test.
-c-test-source-file = ./tests/tests_fixed_point.c 
+c-test-source-file = ./tests/tests_bsp_led.c 
 
 # Define the target dependency file for this single source file
 deps-test-source-file = $(c-test-source-file:.c=c.d.)
@@ -90,13 +90,13 @@ all-object-files := $(all-source-files:%=$(build-dir)/%.o) $(startup-code-object
 ### The route for tests on the host machine
 
 ## HOST TARGET FILES
-#tmpl: everywhere "tests_fixed_point" occurs it should be replaced with a
+#tmpl: everywhere "tests_bsp_led" occurs it should be replaced with a
 #variable.
 
-target-image := $(build-dir)/image/$(target-device)/tests_fixed_point.axf
-target-binary := $(build-dir)/image/$(target-device)/tests_fixed_point.bin
-target-linking-info := $(build-dir)/image/$(target-device)/tests_fixed_point-linking-info.txt
-target-image-info := $(build-dir)/image/$(target-device)/tests_fixed_point-fromelf-info.txt
+target-image := $(build-dir)/image/$(target-device)/tests_bsp_led.axf
+target-binary := $(build-dir)/image/$(target-device)/tests_bsp_led.bin
+target-linking-info := $(build-dir)/image/$(target-device)/tests_bsp_led-linking-info.txt
+target-image-info := $(build-dir)/image/$(target-device)/tests_bsp_led-fromelf-info.txt
 
 # Finding the correct mkdir on windows (by using where). This overrides the default mkdir, which is not an executable. 
 # Not sure if this works on Unix systems, too. Also not sure how to handle it if it returns multiple values
@@ -188,7 +188,7 @@ host-inc-paths = $(inc_jlib) $(inc_jtest)
 host-inc-paths-string = $(addprefix -I, $(host-inc-paths))
 
 
-host-binary := $(build-dir)/host-binary/$(target-device)/tests_fixed_point.exe # <template here>
+host-binary := $(build-dir)/host-binary/$(target-device)/tests_bsp_led.exe # <template here>
 host-binary-dependency-file := $(host-binary:.exe=.d)
 
 -include $(host-binary-dependency-file)
@@ -203,7 +203,7 @@ host-test: $(host-binary)
 $(host-binary): defs = $(common-defs) -DJTEST_HOST
 $(host-binary): $(all-host-source-files)
 	$(MKDIR) -p $(@D)
-	gcc -MMD -ggdb -O0 -o $@ $^ $(defs) $(host-inc-paths-string)
+	gcc -MMD  -o $@ $^ $(defs) $(host-inc-paths-string)
 
 
 

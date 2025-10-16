@@ -49,7 +49,7 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_10_5 hue, SFP_10_5 sat, SFP_10_5 lightne
         0
     );
 
-    
+    // Calculate R_1, G_1, B_1 based on hue_dash.
     // Instead of doing 6 comparisons with floats, hue_dash can also be cast to
     // an int, instead.
     uint8_t hdi = SFP_10_5_TO_INT(hue_dash);
@@ -92,17 +92,24 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_10_5 hue, SFP_10_5 sat, SFP_10_5 lightne
 
     }
 
-
-
-
-    // Calculate R_1, G_1, B_1 based on hue_dash.
-    // TODO: implement a function to do this with BSP_RGB_colour being used for
-    // testability.
+    SFP_10_5 m = lightness - chroma/2;
     
+    // The last step from the wiki page is adding m, here we must also multiply
+    // with 255 to get the desired scale [0-255]
+    R = (R + m) * 255;
+    G = (G + m) * 255;
+    B = (B + m) * 255;
 
-    // TODO: Return actual result
+    // Finally, the actual result (R,G,B) in the range of (0,255).
+    // As I went for that range, I was wondering why, other than force of habit.
+    // Nothing really requires a 0-255 range on my end, except that it neatly
+    // fits into a char.
     BSP_RGB_colour res = {
-        .rgb = {255,255,255}
+        .rgb = {
+            SFP_10_5_TO_INT(R),
+            SFP_10_5_TO_INT(G),
+            SFP_10_5_TO_INT(B)
+        }
     };
     return res;
 }

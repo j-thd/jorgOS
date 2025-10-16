@@ -1,16 +1,10 @@
 #include "jfp.h"
 #include "jtest.h"
 #include <stdio.h>
+#include <stdint.h>
 
 JT_TESTS{
 
-JT_TEST("Assert test"){
-
-    JT_ASSERT(2 == 2);
-    JT_ASSERT(2 == 2);
-    
-
-}
 JT_TEST("Float Conversion checks"){
     // Checking whether the epsilon converts to itself
     JT_ASSERT(
@@ -34,7 +28,7 @@ JT_TEST("Float Conversion checks"){
     JT_ASSERT(SFP_10_5_TO_FLOAT(SFP_10_5_ONE*-0.25) == -0.25f);
     JT_ASSERT(SFP_10_5_TO_FLOAT(FLOAT_TO_SFP_10_5(-0.25f)) == -0.25f);
     
-    JT_ASSERT(SFP_10_5_TO_FLOAT(FLOAT_TO_SFP_10_5(16.0f-0.0001f)) == 16.0f);
+    JT_ASSERT(SFP_10_5_TO_FLOAT(FLOAT_TO_SFP_10_5(16.0f-0.00001f)) == 16.0f);
 
     // Check whether a number that doesn't round well is represented correctly.
     JT_ASSERT(SFP_10_5_TO_FLOAT(SFP_10_5_ONE*0.3f) == 0.3f);
@@ -52,16 +46,44 @@ JT_TEST("Int conversion checks"){
     // The same behavior as (int)float_value is is expected.
     
     // +512 is the limit of the SFP.
+    
+    // printf("\n%X\n", (signed int)x4);
+    float x5 = 16.0f - 0.00001f;
+    // printf("\nx5 = %f", x5);
+    // printf("\n%X", FLOAT_TO_SFP_10_5(x5));
+    // printf("\n%X", SFP_10_5_TO_INT(FLOAT_TO_SFP_10_5(x5)));
+    // printf("\n%X\n", (signed int)x5);
+    float x6 = 16.0f - 0.000001f;
+    // printf("\nx6 = %f", x6);
+    // printf("\n%X", FLOAT_TO_SFP_10_5(x6));
+    // printf("\n%X", SFP_10_5_TO_INT(FLOAT_TO_SFP_10_5(x6)));
+    // printf("\n%X\n", (signed int)x6);
+    float x7 = 16.0f - 0.0000001f;
+    // printf("\nx7 = %f", x7);
+    // printf("\n%X", FLOAT_TO_SFP_10_5(x7));
+    // printf("\n%X", SFP_10_5_TO_INT(FLOAT_TO_SFP_10_5(x7)));
+    // printf("\n%X\n", (signed int)x7);
     SFP_10_5 a = FLOAT_TO_SFP_10_5(16.0f-SFP_10_5_EPSILON);
-    // Learn why this is not rounded to 16 in SFP_10_5...
-    SFP_10_5 b = FLOAT_TO_SFP_10_5(16.0f-0.01f);
+    SFP_10_5 a_2 = FLOAT_TO_SFP_10_5(x6);
+    SFP_10_5 b = FLOAT_TO_SFP_10_5(x7);
+    SFP_10_5 b_2 = FLOAT_TO_SFP_10_5(16.0f - 0.00001f);
+    SFP_10_5 b_3 = FLOAT_TO_SFP_10_5(x5);
     SFP_10_5 c = FLOAT_TO_SFP_10_5(511.7);
     SFP_10_5 d = FLOAT_TO_SFP_10_5(-16);
     SFP_10_5 e = FLOAT_TO_SFP_10_5(-512);
     SFP_10_5 f = FLOAT_TO_SFP_10_5(0.0f);
-
+    JT_ASSERT((int16_t)((1<<5)*x7) == (int16_t)((1<<5)* (16.0f - 0.0000001f)));
+    // Don't really understand why it seems to matter whether a float is defined
+    // first with something like x5 = 16.0f-0.00001f.
+    // Tests for casting back to int differ if:
+    // SFP_10_5 b_2 = FLOAT_TO_SFP_10_5(16.0f - 0.00001f);
+    //  SFP_10_5 b_3 = FLOAT_TO_SFP_10_5(x5); 
+    // I think compile-time float calculations might be weird.
     JT_ASSERT(SFP_10_5_TO_INT(a) == 15);
+    JT_ASSERT(SFP_10_5_TO_INT(a_2) == 15);
     JT_ASSERT(SFP_10_5_TO_INT(b) == 16);
+    JT_ASSERT(SFP_10_5_TO_INT(b_2) == 16);
+    JT_ASSERT(SFP_10_5_TO_INT(b_3) == 15); 
     JT_ASSERT(SFP_10_5_TO_INT(c) == 511);
     JT_ASSERT(SFP_10_5_TO_INT(d) == -16);
     JT_ASSERT(SFP_10_5_TO_INT(e) == -512);

@@ -28,6 +28,7 @@ int main(void){
 
 #ifdef JTEST_TARGET
 int JTEST_run_on_target(void){
+    JTEST_init_target();
     printf("\n\t JTEST started in TARGET mode\n\n");
     printf("TEST FILE loaded: %s\n", JT_test_file_);
     printf("--------------------------------------\n");
