@@ -2,6 +2,11 @@
 arm-toolchain := C:\Program Files\ArmCompilerforEmbedded6.22\bin
 tivaware-toolchain := C:\ti\TivaWare_C_Series-2.2.0.295\tools\bin
 gnuwin32-bin := C:\Program Files (x86)\GnuWin32\bin
+# Hardcode in which version of "find" to use, so we can easily swap uit gnuwin32
+# for mingw etc.... Only the gnuwin32 version seems to work in PowerShell, can't
+# really be bothered to find out why.
+find := C:\Program Files (x86)\GnuWin32\bin\find.exe
+
 
 export PATH:=$(arm-toolchain);$(tivaware-toolchain);$(gnuwin32-bin);$(PATH)
 
@@ -14,7 +19,7 @@ cpu := cortex-m4
 # Find all regular source files and create target names pointing to them in the build directory.
 build-dir := ./build
 source-dir := ./src
-sub-source-dirs := $(shell find $(source-dir) -type d) # installed findutils on windows to make this work. There's no "nice" other solution
+sub-source-dirs := $(shell $(find) $(source-dir) -type d) # installed findutils on windows to make this work. There's no "nice" other solution
 all-source-dirs := $(source-dir) $(sub-source-dirs) #$(addprefix $(source-dir)/, $(sub-source-dirs))
 
 # Find all regular source files with these extensions, put wildcards in them, and use wildcard command to actually match them existing files
@@ -105,7 +110,8 @@ $(build-dir)/%.s.o: %.s
 # Phony target for debugging.
 .PHONY: perp
 perp:
-#	find $(source-dir) -type d
+	where find
+	find $(source-dir) -type d
 #	@echo $(all-source-wildcards)
 	@echo $(sub-source-dirs)
 	@echo $(all-source-files)

@@ -1,11 +1,22 @@
 #include "jtest.h"
 #include <stdio.h>
 #include "bsp_led.h"
+#include "jfp.h"
 
 JT_TESTS{
 
 JT_TEST("Test primary colours plus black/white"){
-    JT_ASSERT(2==2);
+    // Black test. Hue shouldn't matter, lightness = 0; sat = 0;
+    SFP_10_5 H = FLOAT_TO_SFP_10_5(0.0f);
+    SFP_10_5 S = FLOAT_TO_SFP_10_5(0.0f);
+    SFP_10_5 L = FLOAT_TO_SFP_10_5(0.0f);
+
+    BSP_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
+    // JT_ASSERT(res.rgb[0] == 0.0f);
+    // JT_ASSERT(res.rgb[1] == 0.0f);
+    // JT_ASSERT(res.rgb[2] == 0.0f);
+
+
 }
 
 

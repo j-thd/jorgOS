@@ -8,10 +8,12 @@
 ## Setting up PATH variable
 arm-toolchain := C:\Program Files\ArmCompilerforEmbedded6.22\bin
 tivaware-toolchain := C:\ti\TivaWare_C_Series-2.2.0.295\tools\bin
-gnuwin32-bin := C:\msys64\mingw64\bin
+mingw64-bin := C:\msys64\mingw64\bin
+# Cannot really be arsed to find out why this version of find works. Gotta stay focused.
+find := C:\Program Files (x86)\GnuWin32\bin\find.exe
 
 ## tmpl: Can also go in there?
-export PATH:= $(gnuwin32-bin);$(arm-toolchain);$(tivaware-toolchain);$(PATH)
+export PATH:= $(mingw64-bin);$(arm-toolchain);$(tivaware-toolchain);$(PATH)
 
 ## tmpl: Also...
 target-device := TM4C123GH6PM
@@ -41,7 +43,7 @@ main-source-file-to-exlcude := main.c
 # unnecessary, but it is good to separate things until I know what I am doing :)
 build-dir := ./build-target-test
 source-dir := ./src
-sub-source-dirs := $(shell find $(source-dir) -type d) # installed findutils on windows to make this work. There's no "nice" other solution
+sub-source-dirs := $(shell $(find) $(source-dir) -type d) # installed findutils on windows to make this work. There's no "nice" other solution
 all-source-dirs := $(sub-source-dirs) $(test-tools-source-files)
 
 
@@ -152,73 +154,19 @@ $(build-dir)/%.s.o: %.s
 	armclang -masm=auto -c -g -std=c11 -D$(target-device) --include-directory=$(inc_custom_cmsis) -I$(inc_arm_core_cmsis) -D:DEF:__MICROLIB --target=arm-arm-none-eabi -mcpu=$(cpu) -mfpu=none -mfloat-abi=soft $< -o $@ 
 
 .PHONY derp:
-derp:	
+derp:
+	@echo $(PATH)
+	where find
+	C:\Program Files (x86)\GnuWin32\bin\find $(source-dir) -type d
+	@echo $(all-source-dirs)	
+	@echo $(sub-source-dirs)
 	@echo $(all-object-files)
 	@echo $(all-source-files)
 	@echo $(exclude-files)
 	@echo $(target-image)
 	@echo $(target-binary)
 
-## HOST TEST 
-host-build-dir = ./build-host-test
-
-# Let's try to take all of the above, and just convert it to another dir.
-# Okay, that doesn't work, because compiling BSP and and the OS on the host
-# doesn't work. I'm not sure if it could work, but the assembly for ARM cannot
-# be a part of how I currently do GCC compilation. I should remove the BSP and
-# jorgOS from the tests. For now it looks like I should only compile jlib and
-# jtest.
-
-# I should later look into how I can simulate/emulate tests on the host?
-jlib-source-dir = ./src/jlib
-jtest-source-dir = ./jtest
-all-host-source-dirs = $(jlib-source-dir) $(jtest-source-dir)
-
-# Find all source files ending .c in the given source dirs
-host-source-file-extensions = c
-all-host-source-wildcards := $(foreach var,$(host-source-file-extensions), $(addsuffix /*.$(var),$(all-host-source-dirs)))
-all-host-source-files := $(wildcard $(all-host-source-wildcards)) $(c-test-source-file)
-c-test-dependency-file := $(c-test-source-file:.c=.c.d)
-
-# The host (at least with GCC) cannot test any ARM-specific assembly, so these
-# things must not be included. A specific inclusion string must be made for host
-# tests. This should work if the Code Under Test is properly separated from
-# runtime-environment and the BSP package.
-host-inc-paths = $(inc_jlib) $(inc_jtest)
-host-inc-paths-string = $(addprefix -I, $(host-inc-paths))
-
-
-host-binary := $(build-dir)/host-binary/$(target-device)/tests_bsp_led.exe # <template here>
-host-binary-dependency-file := $(host-binary:.exe=.d)
-
--include $(host-binary-dependency-file)
-
-
-.PHONY: host-test
-host-test: $(host-binary)
-	$(host-binary)
-
-
-
-$(host-binary): defs = $(common-defs) -DJTEST_HOST
-$(host-binary): $(all-host-source-files)
-	$(MKDIR) -p $(@D)
-	gcc -MMD  -o $@ $^ $(defs) $(host-inc-paths-string)
-
-
-
-.PHONY perp:
-perp:
-	where gcc
-	@echo $(all-host-source-files)
-	@echo $(host-binary-dependency-file)
-	@echo $(all-host-source-dirs)	
-	@echo $(all-host-object-files)
-	@echo $(host-inc-paths-string)
-	@echo $(common-defs)
-
 .PHONY: clean
 clean:
-	touch $(build-dir) $(host-build-dir)
+	touch $(build-dir)
 	rm -r $(build-dir)
-	rm -r $(host-build-dir)

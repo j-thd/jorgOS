@@ -4,6 +4,11 @@
 
 #include "jtest.h"
 
+// Only include BSP if testing on target
+#ifdef JTEST_TARGET
+#include "bsp.h"
+#endif //JTEST_TARGET
+
 // Make some variables accessible from test-code
 // Bit of a nasty solution, but I want the test-code to look nicer bracket-wise,
 // and this does the trick for now. :)
