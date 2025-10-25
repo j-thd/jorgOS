@@ -3,6 +3,8 @@
 
 #include "runtime_environment.h"
 
+#include "jfp.h"
+
 // LED
 #define LED_RED (1U << 1)
 #define LED_BLUE (1U << 2)
@@ -23,7 +25,7 @@ typedef struct BSP_RGB_colour{
     uint8_t rgb[3];
 } BSP_RGB_colour;
 
-BSP_RGB_colour BSP_LED_RGB_from_HSL(uint16_t hue, uint16_t sat, uint16_t lightness);
+BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_10_5, SFP_10_5, SFP_10_5);
 
 // LED colours with PWM
 void BSP_LED_PWM_init(void);

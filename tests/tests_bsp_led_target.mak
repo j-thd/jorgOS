@@ -155,9 +155,6 @@ $(build-dir)/%.s.o: %.s
 
 .PHONY derp:
 derp:
-	@echo $(PATH)
-	where find
-	C:\Program Files (x86)\GnuWin32\bin\find $(source-dir) -type d
 	@echo $(all-source-dirs)	
 	@echo $(sub-source-dirs)
 	@echo $(all-object-files)

@@ -7,7 +7,6 @@
 #include "jEventQueueThread.h"
 #include "jAssert.h"
 #include "uart.h"
-#include "jtest.h"
 
 #include <stdio.h>
 
@@ -239,4 +238,5 @@ void JTEST_init_target(){
     // Function called by JTEST to allow the target to define how it must be
     // initialized.
         BSP_init();
+        //BSP_LED_blue_on();
 }
