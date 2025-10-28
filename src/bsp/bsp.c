@@ -190,7 +190,7 @@ void BSP_LED_PWM_init(void){
     // Set the divisor to 2 with 0x0, realizing it is 0x7 by default.
     // So I think it must be cleared first with 3 1-bits (0x7), if you want to
     // set anything but 0x0.
-    SYSCTL->RCC &= !(0x7 << RCC_PWMDIV);
+    SYSCTL->RCC &= ~(0x7 << RCC_PWMDIV);
     
     // This just puts the control for block PWM1 Block 2 to the default
     // settings, which mostly consists bitfields for it being enabled and how it
@@ -226,11 +226,6 @@ void BSP_LED_PWM_init(void){
     PWM1->_2_CTL = 0x1; // Enable PWM 1 Generator 2
     PWM1->_3_CTL = 0x1; // Enable PWM 1 Generator 3
     PWM1->ENABLE = 0x7 << 5; // Enable pwm5(3b), 6(4a) and 7(4b)
-
-    while (1)
-    {
-        // Loop around to test the LED behaviour :)
-    }
 
 }
 
