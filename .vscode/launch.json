@@ -44,6 +44,21 @@
             "svdFile": "./device/TM4C123GH6PM/TM4C123GH6PM.svd",
             "runToMain": true,
             //"cmsisPack": "${command:device-manager.getDevicePack}"
+        },
+                {
+            "name": "Cortex (Test File)",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build-target-test/image/TM4C123GH6PM/${fileBasenameNoExtension}.axf",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "interface": "jtag",
+            "device": "TM4C123GH6PM",
+            "searchDir": ["C:\\tools\\openocd\\xpack-openocd-0.12.0-3\\openocd\\scripts\\board"],
+            "configFiles": ["ti_ek-tm4c123gxl.cfg"],
+            "svdFile": "./device/TM4C123GH6PM/TM4C123GH6PM.svd",
+            "runToMain": true,
+            //"cmsisPack": "${command:device-manager.getDevicePack}"
         }
     ]
 }

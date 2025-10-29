@@ -4,7 +4,9 @@
 
 
 
-/// @brief Signed fixed point ( 1 bit signed, 10 int, 5 decimals)
+// SFP_10_5
+
+/// @brief Signed fixed point (10,5) ( 1 bit signed, 10 int, 5 decimals)
 /// This ranges from -16384 to +16384, with 1/32 resolution = 0.03125 in
 /// decimals. This means the limit for the biggest number resulting out of
 /// multiplication is 512, as the scaling will push it 512*32 = 16384
@@ -48,7 +50,44 @@ typedef int16_t SFP_10_5;
 
 SFP_10_5 SFP_10_5_new_F(float);
 SFP_10_5 SFP_10_5_new_D(double);
-// SFP_10_5 SFP_10_5_mul(SFP_10_5, SFP_10_5);
-// SFP_10_5 SFP_10_5_div(SFP_10_5, SFP_10_5);
-// SFP_10_5 SFP_10_5_mod(SFP_10_5, SFP_10_5);
 
+
+// SFP_5_10
+/// @brief Signed fixed point (5,10) ( 1 bit signed, 10 int, 5 decimals)
+/// This ranges from -16 to +32, with 1/(2^10) resolution = 0.0009765625f in
+/// decimals. This means the limit for the biggest number resulting out of
+/// multiplication is 512, as the scaling will push it 512*32 = 16384
+typedef int16_t SFP_5_10;
+// The number one is represented by a shift to the right.
+#define SFP_5_10_SHIFT 10
+#define SFP_5_10_MSHIFT_X 5
+#define SFP_5_10_MSHIFT_Y 5
+#define SFP_5_10_ONE (1 << SFP_5_10_SHIFT)
+#define FLOAT_TO_SFP_5_10(f_) ((SFP_5_10)(SFP_5_10_ONE * f_))
+
+#define SFP_5_10_TO_FLOAT(sfp_) ((float)(sfp_) / SFP_5_10_ONE)
+#define SFP_5_10_TO_INT(sfp_) ((int)(sfp_) / SFP_5_10_ONE)
+#define SFP_5_10_EPSILON 0.0009765625f
+// DBG_NEAR_EQUAL is just intended for testing and debugging, and actually
+// compares floats
+#define SFP_5_10_DBG_NEAR_EQUAL(x_ , y_ , num_eps_ ) \
+    ( x_ <  y_ + num_eps_* SFP_5_10_EPSILON  && \
+      x_ >  y_ - num_eps_ * SFP_5_10_EPSILON  \
+    )
+
+#define SFP_5_10_NEAR_EQUAL(x_, y_, num_LSB_) \
+    ( x_ <  y_ + num_LSB_  && \
+      x_ >  y_ - num_LSB  \
+    )
+
+
+#define SFP_5_10_MULT(x_, y_, x_pre_shift_, y_pre_shift_) \
+    ( ( x_ >> x_pre_shift_ ) * ( y_  >> y_pre_shift_ ) \
+     >> SFP_5_10_SHIFT - x_pre_shift_ - y_pre_shift_ )
+
+
+// Mod 2 should be the same as doing x % (2<<SFP_10_5_SHIFT)
+#define SFP_5_10_MOD_2(x_) (x_ % (2 << SFP_5_10_SHIFT) )
+
+SFP_5_10 SFP_5_10_new_F(float);
+SFP_5_10 SFP_5_10_new_D(double);
