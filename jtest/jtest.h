@@ -12,6 +12,7 @@ void JTEST_end_of_test(uint16_t JT_count, bool first_call);
 
 // Call-back functions for target initilization
 void JTEST_init_target(void);
+void JTEST_target_shutdown(void);
 
 // Actual functions doing the tests
 void JT_assert(bool);

@@ -235,3 +235,17 @@ void JTEST_init_target(){
         BSP_init();
         //BSP_LED_blue_on();
 }
+
+void JTEST_target_shutdown(){
+    //Function called by JTEST to allow the target to define how it must be
+    //stopped.
+    
+    // We need to transmit the last things in the buffer of the serial monitor,
+    // so we can see the results.
+    JSM_PRINTF("Shutting down target...\n");
+    JSM_transmit_buffer();
+    while(1){
+        // Sleep in low-power mode.
+        __WFI();
+    }
+}

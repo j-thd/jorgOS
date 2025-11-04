@@ -21,8 +21,9 @@
         "jfp.h": "c",
         "bsp_led.h": "c",
         "jtest.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "uart.h": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.variableUseNaturalFormat": true,
     "makefile.configureOnOpen": false
 }

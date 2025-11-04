@@ -39,6 +39,7 @@ int JTEST_run_on_target(void){
     printf("--------------------------------------\n");
     JTEST_run_tests();
     JTEST_end_of_test(JT_count, false);
+    JTEST_target_shutdown();
 
     return 0;
 }

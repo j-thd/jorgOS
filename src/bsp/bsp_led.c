@@ -65,35 +65,42 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_5_10 hue, SFP_5_10 sat, SFP_5_10 lightne
             R = chroma;
             G = X;
             B = 0;
+            break;
 
         case 1:
             R = X;
             G = chroma;
             B = 0;
+            break;
 
         case 2:
             R = 0;
             G = chroma;
             B = X;
+            break;
 
         case 3:
             R = 0;
             G = X;
             B = chroma;
+            break;
 
         case 4:
             R = X;
             G = 0;
             B = chroma;
+            break;
 
         case 5:
             R = chroma;
             G = 0;
             B = X;
+            break;
 
         default:
             // The default case should never be reached.
             J_ERROR();
+            break;
 
     }
 
