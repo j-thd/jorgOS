@@ -126,7 +126,7 @@ all: $(target-binary) $(target-image-info)
 
 .PHONY target-test:
 target-test: $(target-binary)
-	lmflash $^ -v -i ICDI 
+	lmflash $^ -r -v -i ICDI 
 
 $(target-binary): defs = $(common-defs) -DJTEST_TARGET
 $(target-binary): $(target-image)

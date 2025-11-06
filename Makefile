@@ -76,7 +76,7 @@ all: $(target-binary) $(target-image-info)
 
 .PHONY: flash
 flash: $(target-binary)
-	lmflash $^ -v -i ICDI 
+	lmflash $^ -r -v -i ICDI 
 $(target-binary): $(target-image)
 	$(MKDIR) -p $(@D)
 	fromelf --bin -o $@ $^
