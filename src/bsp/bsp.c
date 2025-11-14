@@ -236,6 +236,10 @@ void JTEST_init_target(){
         //BSP_LED_blue_on();
 }
 
+void JTEST_target_flush_buffer(){
+    JSM_transmit_buffer();
+}
+
 void JTEST_target_shutdown(){
     //Function called by JTEST to allow the target to define how it must be
     //stopped.

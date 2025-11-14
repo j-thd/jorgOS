@@ -21,35 +21,45 @@ void BSP_LED_set_color(uint8_t red, uint8_t green, uint8_t blue){
 
 
 
-BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_5_10 hue, SFP_5_10 sat, SFP_5_10 lightness){
+BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 lightness){
     // FROM https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
 
     // TODO: set bounds on HSL variables (for fixed point-arithmetic)
     // TODO: turn hue into an int to capture 0-360 range, so SFP_10_5 can be
     // convert to a range that captures the reciprocal of 1/60f
+    
+    // Check the ranges hue: [0,360)
+    J_ASSERT(hue >= 0);
+    J_ASSERT((hue/360) < SFP_11_20_ONE );
+
+    // Saturation [0,1]
+    J_ASSERT(sat >= 0);
+    J_ASSERT(sat <= SFP_11_20_ONE);
+
+    // Lightness [0,1]
+    J_ASSERT(lightness >= 0);
+    J_ASSERT(lightness <= SFP_11_20_ONE);
+
 
     
-    SFP_5_10 chroma = SFP_5_10_MULT(SFP_5_10_ONE  - abs(lightness>>1 - SFP_5_10_ONE), sat, 0 ,0 );
+    SFP_11_20 chroma = SFP_11_20_MULT(SFP_11_20_ONE  - abs(lightness>>1 - SFP_11_20_ONE), sat, 0 ,0 );
     // Hue dash should still be a float, so a constant of 1/60 is needed in
-    // SFP_5_10.
+    // SFP_11_20.
     // I'm assuming that if I simply declare the constant once, it will be optimized
     // and not calculated every time. I should check this in the assembly at
     // some point.
     
-    // TODO: fix reciprocal_of_60 being 0.
-    // 5 bits if is not enough to capture 1/60 at least 6 bits are needed for
-    // 64, and of course a bit more precision would be nice too.
-    const SFP_5_10 reciprocal_of_60 = SFP_5_10_new_F(1/60.0f);
-    SFP_5_10 hue_dash = SFP_5_10_MULT(
+    const SFP_11_20 reciprocal_of_60 = SFP_11_20_new_F(1/60.0f);
+    SFP_11_20 hue_dash = SFP_11_20_MULT(
         hue,
         reciprocal_of_60,
         0,
         0
     );
 
-    SFP_5_10 X = SFP_5_10_MULT(
+    SFP_11_20 X = SFP_11_20_MULT(
         chroma,
-        (SFP_5_10_ONE - abs(SFP_5_10_MOD_2(hue_dash) - SFP_5_10_ONE)),
+        (SFP_11_20_ONE - abs(SFP_11_20_MOD_2(hue_dash) - SFP_11_20_ONE)),
         0,
         0
     );
@@ -57,8 +67,8 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_5_10 hue, SFP_5_10 sat, SFP_5_10 lightne
     // Calculate R_1, G_1, B_1 based on hue_dash.
     // Instead of doing 6 comparisons with floats, hue_dash can also be cast to
     // an int, instead.
-    uint8_t hdi = SFP_5_10_TO_INT(hue_dash);
-    SFP_5_10 R,G,B;
+    uint8_t hdi = SFP_11_20_TO_INT(hue_dash);
+    SFP_11_20 R,G,B;
 
     switch(hdi){
         case 0:
@@ -104,7 +114,7 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_5_10 hue, SFP_5_10 sat, SFP_5_10 lightne
 
     }
 
-    SFP_5_10 m = lightness - chroma/2;
+    SFP_11_20 m = lightness - chroma/2;
     
     // The last step from the wiki page is adding m, here we must also multiply
     // with 255 to get the desired scale [0-255]
@@ -118,9 +128,9 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_5_10 hue, SFP_5_10 sat, SFP_5_10 lightne
     // fits into a char.
     BSP_RGB_colour res = {
         .rgb = {
-            SFP_5_10_TO_INT(R),
-            SFP_5_10_TO_INT(G),
-            SFP_5_10_TO_INT(B)
+            SFP_11_20_TO_INT(R),
+            SFP_11_20_TO_INT(G),
+            SFP_11_20_TO_INT(B)
         }
     };
     return res;

@@ -74,6 +74,11 @@ int JTEST_run_on_host(void){
 /// @return 
 void JTEST_end_of_test(uint16_t JT_count, bool first_call){
     if (!first_call){
-         printf("-> PASS\n\t\t %u checks completed.\n", JT_count);
+        printf("-> PASS\n\t\t %u checks completed.\n", JT_count);
+        // The buffer provides warnings if it is full, but it is not regularly
+        // flushed unlike in the production code.
+        #ifdef JTEST_TARGET
+        JTEST_target_flush_buffer();
+        #endif
     }
 }

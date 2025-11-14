@@ -25,7 +25,7 @@ typedef struct BSP_RGB_colour{
     uint8_t rgb[3];
 } BSP_RGB_colour;
 
-BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_10_5, SFP_10_5, SFP_10_5);
+BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20, SFP_11_20, SFP_11_20);
 
 // LED colours with PWM
 void BSP_LED_PWM_init(void);
