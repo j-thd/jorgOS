@@ -30,7 +30,7 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 ligh
     
     // Check the ranges hue: [0,360)
     J_ASSERT(hue >= 0);
-    J_ASSERT((hue/360) < SFP_11_20_ONE );
+    J_ASSERT((hue/360) <= SFP_11_20_ONE );
 
     // Saturation [0,1]
     J_ASSERT(sat >= 0);
