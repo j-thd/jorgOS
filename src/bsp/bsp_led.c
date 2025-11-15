@@ -41,8 +41,9 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 ligh
     J_ASSERT(lightness <= SFP_11_20_ONE);
 
 
-    
-    SFP_11_20 chroma = SFP_11_20_MULT(SFP_11_20_ONE  - abs(lightness>>1 - SFP_11_20_ONE), sat, 0 ,0 );
+    JSM_PRINTF("%i",abs((lightness<<1) - SFP_11_20_ONE));
+    JSM_transmit_buffer();
+    SFP_11_20 chroma = SFP_11_20_MULT(SFP_11_20_ONE  - abs((lightness<<1) - SFP_11_20_ONE), sat, 0 ,0 );
     // Hue dash should still be a float, so a constant of 1/60 is needed in
     // SFP_11_20.
     // I'm assuming that if I simply declare the constant once, it will be optimized

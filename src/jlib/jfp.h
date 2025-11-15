@@ -82,7 +82,7 @@ typedef int16_t SFP_5_10;
 
 
 #define SFP_5_10_MULT(x_, y_, x_pre_shift_, y_pre_shift_) \
-    ( ( x_ >> x_pre_shift_ ) * ( y_  >> y_pre_shift_ ) \
+    ( ( (x_) >> x_pre_shift_ ) * ( (y_)  >> y_pre_shift_ ) \
      >> SFP_5_10_SHIFT - x_pre_shift_ - y_pre_shift_ )
 
 
@@ -110,7 +110,7 @@ typedef int32_t SFP_11_20;
 #define SFP_11_20_SHIFT 20
 #define SFP_11_20_MSHIFT_X 10
 #define SFP_11_20_MSHIFT_Y 10
-#define SFP_11_20_ONE (1 << SFP_5_10_SHIFT)
+#define SFP_11_20_ONE (1 << SFP_11_20_SHIFT)
 #define FLOAT_TO_SFP_11_20(f_) ((SFP_11_20)(SFP_11_20_ONE * f_))
 
 #define SFP_11_20_TO_FLOAT(sfp_) ((float)(sfp_) / SFP_11_20_ONE)
@@ -130,7 +130,7 @@ typedef int32_t SFP_11_20;
 
 
 #define SFP_11_20_MULT(x_, y_, x_pre_shift_, y_pre_shift_) \
-    ( ( x_ >> x_pre_shift_ ) * ( y_  >> y_pre_shift_ ) \
+    ( ( (x_) >> x_pre_shift_ ) * ( (y_)  >> y_pre_shift_ ) \
      >> SFP_11_20_SHIFT - x_pre_shift_ - y_pre_shift_ )
 
 
