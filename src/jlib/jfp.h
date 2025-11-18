@@ -42,7 +42,7 @@ typedef int16_t SFP_10_5;
 // Negative shifts are not desired, but at least gcc emits a warning if this happens.
 #define SFP_10_5_MULT(x_, y_, x_pre_shift_, y_pre_shift_) \
     ( ( x_ >> x_pre_shift_ ) * ( y_  >> y_pre_shift_ ) \
-     >> SFP_10_5_SHIFT - x_pre_shift_ - y_pre_shift_ )
+     >> (SFP_10_5_SHIFT - x_pre_shift_ - y_pre_shift_) )
 
 
 // Mod 2 should be the same as doing x % (2<<SFP_10_5_SHIFT)
@@ -83,7 +83,7 @@ typedef int16_t SFP_5_10;
 
 #define SFP_5_10_MULT(x_, y_, x_pre_shift_, y_pre_shift_) \
     ( ( (x_) >> x_pre_shift_ ) * ( (y_)  >> y_pre_shift_ ) \
-     >> SFP_5_10_SHIFT - x_pre_shift_ - y_pre_shift_ )
+     >> (SFP_5_10_SHIFT - x_pre_shift_ - y_pre_shift_) )
 
 
 // Mod 2 should be the same as doing x % (2<<SFP_10_5_SHIFT)
@@ -131,7 +131,7 @@ typedef int32_t SFP_11_20;
 
 #define SFP_11_20_MULT(x_, y_, x_pre_shift_, y_pre_shift_) \
     ( ( (x_) >> x_pre_shift_ ) * ( (y_)  >> y_pre_shift_ ) \
-     >> SFP_11_20_SHIFT - x_pre_shift_ - y_pre_shift_ )
+     >> (SFP_11_20_SHIFT - x_pre_shift_ - y_pre_shift_ ))
 
 
 // Mod 2 should be the same as doing x % (2<<SFP_10_5_SHIFT)

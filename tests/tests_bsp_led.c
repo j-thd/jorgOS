@@ -130,28 +130,39 @@ JT_TEST("Test the rainbow!"){
     JT_ASSERT(res.rgb[1] == 0);
     JT_ASSERT(res.rgb[2] == 0);
 
-    // Black 60-120
-    H = FLOAT_TO_SFP_11_20(7255);
+    // Yellow
+    H = FLOAT_TO_SFP_11_20(60.0f);
+    res = BSP_LED_RGB_from_HSL(H, S, L);
     JT_ASSERT(res.rgb[0] == 255);
+    JT_ASSERT(res.rgb[1] >= 254 && res.rgb[1] <= 255);
+    JT_ASSERT(res.rgb[2] == 0);
+
+    // Green
+    H = FLOAT_TO_SFP_11_20(120.0f);
+    res = BSP_LED_RGB_from_HSL(H, S, L);
+    JT_ASSERT(res.rgb[0] == 0);
     JT_ASSERT(res.rgb[1] == 255);
+    JT_ASSERT(res.rgb[2] == 0);
+
+    // Cyan
+    H = FLOAT_TO_SFP_11_20(180.0f);
+    res = BSP_LED_RGB_from_HSL(H, S, L);
+    JT_ASSERT(res.rgb[0] == 0);
+    JT_ASSERT(res.rgb[1] == 255);
+    JT_ASSERT(res.rgb[2] >= 254 && res.rgb[2] <= 255);
+
+    // Blue
+    H = FLOAT_TO_SFP_11_20(240.0f);
+    res = BSP_LED_RGB_from_HSL(H, S, L);
+    JT_ASSERT(res.rgb[0] == 0);
+    JT_ASSERT(res.rgb[1] == 0);
     JT_ASSERT(res.rgb[2] == 255);
 
-    // Black 120-180
-    H = FLOAT_TO_SFP_11_20(171.0f);
-    JT_ASSERT(res.rgb[0] == 255);
-    JT_ASSERT(res.rgb[1] == 255);
-    JT_ASSERT(res.rgb[2] == 255);
-
-    // Black 180-240
-    H = FLOAT_TO_SFP_11_20(193.123f);
-    JT_ASSERT(res.rgb[0] == 255);
-    JT_ASSERT(res.rgb[1] == 255);
-    JT_ASSERT(res.rgb[2] == 255);
-
-    // Black 240-360
-    H = FLOAT_TO_SFP_11_20(359.99999999999999f);
-    JT_ASSERT(res.rgb[0] == 255);
-    JT_ASSERT(res.rgb[1] == 255);
+    // Magenta
+    H = FLOAT_TO_SFP_11_20(300.0f);
+    res = BSP_LED_RGB_from_HSL(H, S, L);
+    JT_ASSERT(res.rgb[0] >= 254 && res.rgb[0] <= 255);
+    JT_ASSERT(res.rgb[1] == 0);
     JT_ASSERT(res.rgb[2] == 255);
 }
 

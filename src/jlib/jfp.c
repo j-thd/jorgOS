@@ -21,8 +21,8 @@ SFP_5_10 SFP_5_10_new_D(double d){
 // SFP_11_20
 
 SFP_11_20 SFP_11_20_new_F(float f){
-    return (SFP_11_20)(SFP_5_10_ONE * f);
+    return (SFP_11_20)(SFP_11_20_ONE * f);
 }
 SFP_11_20 SFP_11_20_new_D(double d){
-    return (SFP_11_20)(SFP_5_10_ONE * d);
+    return (SFP_11_20)(SFP_11_20_ONE * d);
 };
