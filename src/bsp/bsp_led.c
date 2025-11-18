@@ -49,7 +49,7 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 ligh
         SFP_11_20_ONE  - abs((lightness<<1) - SFP_11_20_ONE),
          sat,
          5 ,5 );
-    JSM_PRINTF("Chroma: %i\n", chroma);
+    // JSM_PRINTF("Chroma: %i\n", chroma);
     J_ASSERT(chroma >=0);
     J_ASSERT(chroma <= SFP_11_20_ONE);
     // Hue dash should still be a float, so a constant of 1/60 is needed in
@@ -65,24 +65,24 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 ligh
         15,
         0
     );
-    JSM_PRINTF("Hue_dash: %i\n", hue_dash);
+    // JSM_PRINTF("Hue_dash: %i\n", hue_dash);
     J_ASSERT(0 <=  hue_dash);
     J_ASSERT(6*SFP_11_20_ONE >= hue_dash);
-    JSM_PRINTF("Y: %i\n", abs(SFP_11_20_MOD_2(hue_dash) - SFP_11_20_ONE));
+    //JSM_PRINTF("Y: %i\n", abs(SFP_11_20_MOD_2(hue_dash) - SFP_11_20_ONE));
     SFP_11_20 X = SFP_11_20_MULT(
         chroma,
         (SFP_11_20_ONE - abs(SFP_11_20_MOD_2(hue_dash) - SFP_11_20_ONE)),
         5,
         5
     );
-    JSM_PRINTF("X: %i\n", X);
+    // JSM_PRINTF("X: %i\n", X);
     J_ASSERT(X >=0);
     J_ASSERT(X <= SFP_11_20_ONE);
     // Calculate R_1, G_1, B_1 based on hue_dash.
     // Instead of doing 6 comparisons with floats, hue_dash can also be cast to
     // an int, instead.
     uint8_t hdi = SFP_11_20_TO_INT(hue_dash);
-    JSM_PRINTF("hdi: %i\n", hdi);
+    // JSM_PRINTF("hdi: %i\n", hdi);
     SFP_11_20 R,G,B;
 
     switch(hdi){
