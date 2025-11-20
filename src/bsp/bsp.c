@@ -236,6 +236,13 @@ void JTEST_init_target(){
         //BSP_LED_blue_on();
 }
 
+
+/// JTEST Callbacks
+
+// A guard is strictly not necessary, but these functions should only be used
+// when running a test on the target
+
+#ifdef JTEST_TARGET
 void JTEST_target_flush_buffer(){
     JSM_transmit_buffer();
 }
@@ -253,3 +260,4 @@ void JTEST_target_shutdown(){
         __WFI();
     }
 }
+#endif
