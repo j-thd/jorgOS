@@ -228,7 +228,12 @@ void BSP_LED_PWM_init(void){
     PWM1->ENABLE = 0x7 << 5; // Enable pwm5(3b), 6(4a) and 7(4b)
 
 }
+/// JTEST Callbacks
 
+// A guard is strictly not necessary, but these functions should only be used
+// when running a test on the target
+
+#ifdef JTEST_TARGET
 void JTEST_init_target(){
     // Function called by JTEST to allow the target to define how it must be
     // initialized.
@@ -237,12 +242,7 @@ void JTEST_init_target(){
 }
 
 
-/// JTEST Callbacks
 
-// A guard is strictly not necessary, but these functions should only be used
-// when running a test on the target
-
-#ifdef JTEST_TARGET
 void JTEST_target_flush_buffer(){
     JSM_transmit_buffer();
 }
