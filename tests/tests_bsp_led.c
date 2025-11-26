@@ -14,7 +14,7 @@ JT_TEST("Test black"){
 
     // Black 0-60
     SFP_11_20 H = FLOAT_TO_SFP_11_20(0.0f);
-    BSP_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
+    BSP_LED_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
     JT_ASSERT(res.rgb[0] == 0);
     JT_ASSERT(res.rgb[1] == 0);
     JT_ASSERT(res.rgb[2] == 0);
@@ -68,7 +68,7 @@ JT_TEST("Test white"){
 
     // White 0-60
     SFP_11_20 H = FLOAT_TO_SFP_11_20(0.0f);
-    BSP_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
+    BSP_LED_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
     JT_ASSERT(res.rgb[0] == 255);
     JT_ASSERT(res.rgb[1] == 255);
     JT_ASSERT(res.rgb[2] == 255);
@@ -125,7 +125,7 @@ JT_TEST("Test the rainbow!"){
 
     // Red
     SFP_11_20 H = FLOAT_TO_SFP_11_20(0.0f);
-    BSP_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
+    BSP_LED_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
     JT_ASSERT(res.rgb[0] == 255);
     JT_ASSERT(res.rgb[1] == 0);
     JT_ASSERT(res.rgb[2] == 0);
@@ -180,7 +180,7 @@ JT_TEST("Semi-arbitrary colour test"){
     SFP_11_20 H = FLOAT_TO_SFP_11_20(30.0f);
     SFP_11_20 S = FLOAT_TO_SFP_11_20(0.75f);
     SFP_11_20 L = FLOAT_TO_SFP_11_20(0.875f);
-    BSP_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
+    BSP_LED_RGB_colour res = BSP_LED_RGB_from_HSL(H, S, L);
     // RGB = F7DFC7
     JT_ASSERT(res.rgb[0] >= 0xF6 && res.rgb[0] <= 0xF8);
     JT_ASSERT(res.rgb[1] >= 0xDE && res.rgb[1] <= 0xE0);

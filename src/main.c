@@ -189,6 +189,12 @@ uint32_t bsp_eqt_stack[BSP_EQT_STACKSIZE];
 OS_EventQueue_Thread bsp_eqt_thread;
 J_Event bsp_eqt_event_buffer[BSP_EQT_EVENT_BUFFER_SIZE];
 
+// Led colour setting
+SFP_11_20 hue = 0;
+SFP_11_20 lightness = FLOAT_TO_SFP_11_20(0.5f);
+SFP_11_20 saturation = SFP_11_20_ONE;
+
+
 // BSP event handler
 void bsp_event_handler(J_Event e){
     //JSM_PRINTF("Event %i\n", e.sig);
@@ -211,6 +217,11 @@ void bsp_event_handler(J_Event e){
         break;
 
     case BUTTON_2_DEPRESSED:
+        // Test cycling through hues.
+        hue = (hue + SFP_11_20_ONE * 1)  % (SFP_11_20_ONE*360);
+
+        BSP_LED_set_color_HSL(hue,saturation, lightness);
+
         JSM_PRINTF("BUTTON 2 PRESSED\n");
         break;
 
@@ -227,7 +238,7 @@ void bsp_event_handler(J_Event e){
 int main(void) {    
     
     BSP_init();
-    //BSP_LED_set_color(0,10,10);
+    BSP_LED_set_color_HSL(hue, saturation, lightness);
 
     OS_init();
 
