@@ -19,6 +19,7 @@ void BSP_LED_blue_on(void);
 
 void BSP_LED_set_color(uint8_t, uint8_t, uint8_t);
 void BSP_LED_update(void);
+static void BSP_LED_set_PWM_signal(uint8_t , uint8_t, uint8_t );
 
 // HSL to RGB utilities
 typedef struct BSP_RGB_colour{
@@ -35,5 +36,26 @@ void BSP_LED_PWM_init(void);
 #define LED_RED_PMC    ( PCTL_LED_PWM << 4  )
 #define LED_GREEN_PMC  ( PCTL_LED_PWM << 8  )
 #define LED_BLUE_PMC   ( PCTL_LED_PWM << 12 )
+
+#define BSP_LED_MAX_LOAD_VALUE 10000U
+
+
+// SYSCTL->RCC bitfields
+#define RCC_USEPWMDIV (20)
+#define RCC_PWMDIV    (17)
+
+// PWMnGENx fields
+// Possible values in bitfields
+#define DRIVE_PWM_x_LOW     (0x2)
+#define DRIVE_PWM_x_HIGH    (0x3)
+// ACTion on LOAD value is to drive pwm x (A/B) high
+
+#define ACTLOAD_PWM_x_HIGH (DRIVE_PWM_x_HIGH << 2) 
+#define ACTCMPAD_PWM_x_LOW (DRIVE_PWM_x_LOW << 6)
+// ACT on hitting CoMParator B value when counting Down is to drive pwm x (A/B)
+// low 
+#define ACTCMPBD_PWM_x_LOW (DRIVE_PWM_x_LOW << 10) 
+
+
 
 #endif //__BSP_LED_H_

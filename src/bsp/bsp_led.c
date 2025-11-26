@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "runtime_environment.h"
 #include "bsp_led.h"
 #include "jfp.h"
 #include "jAssert.h"
@@ -13,22 +14,36 @@ uint8_t BSP_LED_blue = 0;
 uint8_t BSP_LED_clock = 0;
 
 void BSP_LED_set_color(uint8_t red, uint8_t green, uint8_t blue){
-    BSP_LED_red = red;
-    BSP_LED_green = green;
-    BSP_LED_blue = blue;
+    BSP_LED_set_PWM_signal(red, green, blue);
 }
 
 
+/// @brief Take the RGB value and convert it to a suitable CMP value in the PWM
+/// registers. This is where we can tweak the non-linear behaviour of the
+/// LED/PWM combo too. Also, if the value is 0, the PWM must be turned off
+/// completely, as a faint light will always be visible otherwise. Function
+/// @param red 0-255 value
+/// @param green 0-255 value
+/// @param blue 0-255 value
+static void BSP_LED_set_PWM_signal(uint8_t red, uint8_t green, uint8_t blue){
+    // Multiply first with MAX load value for less rounding errors
+    // MAX LOAD value was 10k at time of writing code, so 16-bit is enough
+
+    // The signal is inverted so CMP values actually drive the target high now.
+    // The inversion stops the tiny blip of light when you went the LED to be dark.
+
+    PWM1->_2_CMPB = (red * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 255; // This value drives 2pwmB low // RED
+    PWM1->_3_CMPA = (green * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 255;// This value drives 3pwmA low // BLUE
+    PWM1->_3_CMPB = (blue * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 255;// This value drives 3pwmB low // GREEN
+
+
+}
 
 
 BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 lightness){
     // FROM https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
-
-    // TODO: set bounds on HSL variables (for fixed point-arithmetic)
-    // TODO: turn hue into an int to capture 0-360 range, so SFP_10_5 can be
-    // convert to a range that captures the reciprocal of 1/60f
     
-    // Check the ranges hue: [0,360)
+    // Check the ranges hue: [0,360]
     J_ASSERT(hue >= 0);
     J_ASSERT((hue/360) <= SFP_11_20_ONE );
 
@@ -44,12 +59,12 @@ BSP_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 ligh
     
     JSM_transmit_buffer();
     // Some preshift for the multiplicatin is required because SFP_11_20_ONE
-    // will over flow.
+    // will overflow without it.
     SFP_11_20 chroma = SFP_11_20_MULT(
         SFP_11_20_ONE  - abs((lightness<<1) - SFP_11_20_ONE),
          sat,
          5 ,5 );
-    // JSM_PRINTF("Chroma: %i\n", chroma);
+
     J_ASSERT(chroma >=0);
     J_ASSERT(chroma <= SFP_11_20_ONE);
     // Hue dash should still be a float, so a constant of 1/60 is needed in
@@ -179,4 +194,66 @@ void BSP_LED_blue_on(void){
 
 void BSP_LED_blue_off(void){
     GPIOF_AHB->DATA_BITS[(LED_BLUE)] = 0;
+}
+
+// LED COLOURS THROUGH PWM
+void BSP_LED_PWM_init(void){
+    // This is partially based on the TM4C datasheet page 1239. Register names
+    // seem to be deprecated in this manual.
+    SYSCTL->RCGCPWM |= (1U << 1); // Enable clock for PWM1
+    // Set the pins to alternative functions so it can be set respond to PWM
+    // signals
+    GPIOF_AHB->AFSEL |= (LED_RED | LED_GREEN | LED_BLUE);
+    //Set the Port Control to the PWM signals.
+    GPIOF_AHB->PCTL |= (LED_RED_PMC | LED_GREEN_PMC | LED_BLUE_PMC);
+    // Turn on the clock divisor for PWM
+    SYSCTL->RCC |= 1U << RCC_USEPWMDIV;
+    // Set the divisor to 2 with 0x0, realizing it is 0x7 by default.
+    // So I think it must be cleared first with 3 1-bits (0x7), if you want to
+    // set anything but 0x0.
+    SYSCTL->RCC &= ~(0x7 << RCC_PWMDIV);
+    
+    // This just puts the control for block PWM1 Block 2 to the default
+    // settings, which mostly consists bitfields for it being enabled and how it
+    // should deal with updates to particular values (synchronization). Also,
+    // something about fault handling.
+    // PWM Block 1 Generator 2 b is for Pin F1 (red LED)
+    PWM1->_2_CTL = 0x0;
+    // PWM Block 1 Generator 3 a & b is for Pin F2 & F3 (blue & green LED)
+    PWM1->_3_CTL = 0x0;
+    
+    // RED LED (Generator 2 pwm b)
+    // Drive the pwmB signal high on LOAD value and low on CMP B value (when
+    // counting down)
+    PWM1->_2_GENB = ( ACTLOAD_PWM_x_HIGH | ACTCMPBD_PWM_x_LOW );
+    // Blue LED (Generator 3 pwm A)
+    // Drive the pwmA signal high on LOAD value and low on CMP A value (when
+    // counting down)
+    PWM1->_3_GENA = ( ACTLOAD_PWM_x_HIGH | ACTCMPAD_PWM_x_LOW );
+    // Green LED
+    // Drive the pwmB signal high on LOAD value and low on CMP B value (when
+    // counting down)
+    PWM1->_3_GENB = ( ACTLOAD_PWM_x_HIGH | ACTCMPBD_PWM_x_LOW );
+
+    // Provided that the clock is 10 MHz (System clock divided by 2 with PWMDIV
+    // 399 for 400 ticks per period for 40 microseconds resulting in 25 kHz
+    PWM1->_2_LOAD = BSP_LED_MAX_LOAD_VALUE; // This value drives pwm high according to GENx settings
+    PWM1->_3_LOAD = BSP_LED_MAX_LOAD_VALUE;
+    // 99 for 75% duty cycle (100/400). 
+    
+    BSP_LED_set_color(255,255,255);
+
+    // Inverting the signal might get rid of the tiny blip when the cmp value is
+    // 0 (although I suppose it introduces a tiny dimming too, but don't really
+    // care about that. That won't be visible at all.)
+    PWM1->INVERT = 0x7 << 5;
+
+    PWM1->_2_CTL = 0x1; // Enable PWM 1 Generator 2
+    PWM1->_3_CTL = 0x1; // Enable PWM 1 Generator 3
+    PWM1->ENABLE = 0x7 << 5; // Enable pwm5(3b), 6(4a) and 7(4b)
+
+    while (1) {
+
+    }
+
 }
