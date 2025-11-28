@@ -10,10 +10,8 @@
 #define LED_BLUE (1U << 2)
 #define LED_GREEN (1U << 3)
 
-// HSL to RGB utilities
-typedef struct BSP_LED_RGB_colour{
-    uint8_t rgb[3];
-} BSP_LED_RGB_colour;
+typedef uint8_t BSP_LED_RGB[3];
+typedef uint8_t BSP_LED_RGB_TYPE;
 
 void BSP_LED_red_off(void);
 void BSP_LED_red_on(void);
@@ -22,13 +20,12 @@ void BSP_LED_green_on(void);
 void BSP_LED_blue_off(void);
 void BSP_LED_blue_on(void);
 
-void BSP_LED_set_color_RGB(BSP_LED_RGB_colour);
+void BSP_LED_set_color_RGB(BSP_LED_RGB*);
 void BSP_LED_set_color_HSL(SFP_11_20, SFP_11_20 , SFP_11_20);
-static void BSP_LED_set_PWM_signal(BSP_LED_RGB_colour);
+static void BSP_LED_set_PWM_signal(BSP_LED_RGB*);
 
 
-
-BSP_LED_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20, SFP_11_20, SFP_11_20);
+void BSP_LED_RGB_from_HSL(BSP_LED_RGB*, SFP_11_20, SFP_11_20, SFP_11_20);
 
 // LED colours with PWM
 void BSP_LED_PWM_init(void);
@@ -39,7 +36,7 @@ void BSP_LED_PWM_init(void);
 #define LED_GREEN_PMC  ( PCTL_LED_PWM << 8  )
 #define LED_BLUE_PMC   ( PCTL_LED_PWM << 12 )
 
-#define BSP_LED_MAX_LOAD_VALUE 10000U
+#define BSP_LED_MAX_LOAD_VALUE 0xFF
 
 
 // SYSCTL->RCC bitfields

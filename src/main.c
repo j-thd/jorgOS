@@ -191,7 +191,7 @@ J_Event bsp_eqt_event_buffer[BSP_EQT_EVENT_BUFFER_SIZE];
 
 // Led colour setting
 SFP_11_20 hue = 0;
-SFP_11_20 lightness = FLOAT_TO_SFP_11_20(0.5f);
+SFP_11_20 lightness = FLOAT_TO_SFP_11_20(0.002f);
 SFP_11_20 saturation = SFP_11_20_ONE;
 
 
@@ -208,8 +208,15 @@ void bsp_event_handler(J_Event e){
     
     case BUTTON_1_DEPRESSED:
         // Testing the semaphore.
-        J_sema_signal(&sema_test);
+       
         JSM_PRINTF("BUTTON 1 PRESSED\n");
+        
+        //J_sema_signal(&sema_test);
+
+        lightness = (lightness + SFP_11_20_ONE / 64) % SFP_11_20_ONE;
+        JSM_PRINTF("L: {%1.5f}\n", SFP_11_20_TO_FLOAT(lightness));
+        BSP_LED_set_color_HSL(hue,saturation, lightness);
+
         break;
 
     case BUTTON_1_RELEASED:
@@ -218,7 +225,7 @@ void bsp_event_handler(J_Event e){
 
     case BUTTON_2_DEPRESSED:
         // Test cycling through hues.
-        hue = (hue + SFP_11_20_ONE * 1)  % (SFP_11_20_ONE*360);
+        hue = (hue + SFP_11_20_ONE * 60)  % (SFP_11_20_ONE*360);
 
         BSP_LED_set_color_HSL(hue,saturation, lightness);
 

@@ -29,21 +29,6 @@ enum BSP_Signals{
     BUTTON_2_RELEASED
 };
 
-// SYSCTL->RCC bitfields
-#define RCC_USEPWMDIV (20)
-#define RCC_PWMDIV    (17)
 
-// PWMnGENx fields
-// Possible values in bitfields
-#define DRIVE_PWM_x_LOW     (0x2)
-#define DRIVE_PWM_x_HIGH    (0x3)
-// ACTion on LOAD value is to drive pwm x (A/B) high
-
-
-#define ACTLOAD_PWM_x_HIGH (DRIVE_PWM_x_HIGH << 2) 
-#define ACTCMPAD_PWM_x_LOW (DRIVE_PWM_x_LOW << 6)
-// ACT on hitting CoMParator B value when counting Down is to drive pwm x (A/B)
-// low 
-#define ACTCMPBD_PWM_x_LOW (DRIVE_PWM_x_LOW << 10) 
 
 #endif //__BSP_H_

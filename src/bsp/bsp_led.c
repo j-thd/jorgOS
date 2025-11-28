@@ -10,13 +10,14 @@
 /// @param saturation 0-1
 /// @param lightness 0-1
 void BSP_LED_set_color_HSL(SFP_11_20 hue, SFP_11_20 saturation, SFP_11_20 lightness){
-    BSP_LED_set_PWM_signal( 
-        BSP_LED_RGB_from_HSL(hue, saturation, lightness));
+    BSP_LED_RGB rgb; 
+    BSP_LED_RGB_from_HSL(&rgb, hue, saturation, lightness);
+    BSP_LED_set_PWM_signal(&rgb);
 
 }
 
-void BSP_LED_set_color_RGB(BSP_LED_RGB_colour colour){
-    BSP_LED_set_PWM_signal(colour);
+void BSP_LED_set_color_RGB(BSP_LED_RGB * p_rgb){
+    BSP_LED_set_PWM_signal(p_rgb);
 }
 
 
@@ -27,22 +28,29 @@ void BSP_LED_set_color_RGB(BSP_LED_RGB_colour colour){
 /// @param red 0-255 value
 /// @param green 0-255 value
 /// @param blue 0-255 value
-static void BSP_LED_set_PWM_signal(BSP_LED_RGB_colour colour){
+static void BSP_LED_set_PWM_signal(BSP_LED_RGB * p_rgb){
     // Multiply first with MAX load value for less rounding errors
     // MAX LOAD value was 10k at time of writing code, so 16-bit is enough
 
     // The signal is inverted so CMP values actually drive the target high now.
     // The inversion stops the tiny blip of light when you went the LED to be dark.
 
-    PWM1->_2_CMPB = (colour.rgb[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 255; // This value drives 2pwmB low // RED
-    PWM1->_3_CMPA = (colour.rgb[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 255;// This value drives 3pwmA low // BLUE
-    PWM1->_3_CMPB = (colour.rgb[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 255;// This value drives 3pwmB low // GREEN
+    // The "order" of the PWM signals is rBG instead or rGB.
+    PWM1->_2_CMPB = (*p_rgb[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
+    PWM1->_3_CMPA = (*p_rgb[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
+    PWM1->_3_CMPB = (*p_rgb[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
 
+    JSM_PRINTF("\nR: %i\tG: %i\tB: %i\n", *p_rgb[0], *p_rgb[1], *p_rgb[2]);
 
 }
 
 
-BSP_LED_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 lightness){
+/// @brief Take Hue, Saturation and Lightness value and return them in p_rgb.
+/// @param p_rgb 
+/// @param hue 
+/// @param sat 
+/// @param lightness 
+void BSP_LED_RGB_from_HSL(BSP_LED_RGB * p_rgb, SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 lightness){
     // FROM https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
     
     // Check the ranges hue: [0,360]
@@ -150,22 +158,19 @@ BSP_LED_RGB_colour BSP_LED_RGB_from_HSL(SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 
     
     // The last step from the wiki page is adding m, here we must also multiply
     // with 255 to get the desired scale [0-255]
-    R = (R + m) * 255;
-    G = (G + m) * 255;
-    B = (B + m) * 255;
-
+    
     // Finally, the actual result (R,G,B) in the range of (0,255).
     // As I went for that range, I was wondering why, other than force of habit.
     // Nothing really requires a 0-255 range on my end, except that it neatly
     // fits into a char.
-    BSP_LED_RGB_colour res = {
-        .rgb = {
-            SFP_11_20_TO_INT(R),
-            SFP_11_20_TO_INT(G),
-            SFP_11_20_TO_INT(B)
-        }
-    };
-    return res;
+
+    // So, when using a typedeffed array, you cannot simply dereference, as you
+    // will dereference to that array type. I'm not sure what the clean
+    // idiomatic solution is for keeping some values together in C.
+
+    ((BSP_LED_RGB_TYPE*)p_rgb)[0] = SFP_11_20_TO_INT((R + m) * 255);
+    ((BSP_LED_RGB_TYPE*)p_rgb)[1] = SFP_11_20_TO_INT((G + m) * 255);
+    ((BSP_LED_RGB_TYPE*)p_rgb)[2] = SFP_11_20_TO_INT((B + m) * 255);
 }
 
 
