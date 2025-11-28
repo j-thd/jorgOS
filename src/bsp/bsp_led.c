@@ -9,9 +9,9 @@
 /// @param hue 0-360
 /// @param saturation 0-1
 /// @param lightness 0-1
-void BSP_LED_set_color_HSL(SFP_11_20 hue, SFP_11_20 saturation, SFP_11_20 lightness){
+void BSP_LED_set_color_HSL(BSP_LED_HSL* hsl){
     BSP_LED_RGB rgb; 
-    BSP_LED_RGB_from_HSL(&rgb, hue, saturation, lightness);
+    BSP_LED_RGB_from_HSL(&rgb, hsl);
     BSP_LED_set_PWM_signal(&rgb);
 
 }
@@ -36,11 +36,15 @@ static void BSP_LED_set_PWM_signal(BSP_LED_RGB * p_rgb){
     // The inversion stops the tiny blip of light when you went the LED to be dark.
 
     // The "order" of the PWM signals is rBG instead or rGB.
-    PWM1->_2_CMPB = (*p_rgb[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
-    PWM1->_3_CMPA = (*p_rgb[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
-    PWM1->_3_CMPB = (*p_rgb[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
+    PWM1->_2_CMPB = (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
+    PWM1->_3_CMPA = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
+    PWM1->_3_CMPB = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
 
-    JSM_PRINTF("\nR: %i\tG: %i\tB: %i\n", *p_rgb[0], *p_rgb[1], *p_rgb[2]);
+    JSM_PRINTF("\nR: %i\tG: %i\tB: %i\n", 
+        ((BSP_LED_RGB_TYPE *)p_rgb)[0], 
+        ((BSP_LED_RGB_TYPE *)p_rgb)[1], 
+        ((BSP_LED_RGB_TYPE *)p_rgb)[2]
+    );
 
 }
 
@@ -50,20 +54,20 @@ static void BSP_LED_set_PWM_signal(BSP_LED_RGB * p_rgb){
 /// @param hue 
 /// @param sat 
 /// @param lightness 
-void BSP_LED_RGB_from_HSL(BSP_LED_RGB * p_rgb, SFP_11_20 hue, SFP_11_20 sat, SFP_11_20 lightness){
+void BSP_LED_RGB_from_HSL(BSP_LED_RGB * p_rgb, BSP_LED_HSL* p_hsl){
     // FROM https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
     
     // Check the ranges hue: [0,360]
-    J_ASSERT(hue >= 0);
-    J_ASSERT((hue/360) <= SFP_11_20_ONE );
+    J_ASSERT(((BSP_LED_HSL_TYPE *)p_hsl)[0] >= 0);
+    J_ASSERT((((BSP_LED_HSL_TYPE *)p_hsl)[0]/360) <= SFP_11_20_ONE );
 
     // Saturation [0,1]
-    J_ASSERT(sat >= 0);
-    J_ASSERT(sat <= SFP_11_20_ONE);
+    J_ASSERT(((BSP_LED_HSL_TYPE *)p_hsl)[1] >= 0);
+    J_ASSERT(((BSP_LED_HSL_TYPE *)p_hsl)[1] <= SFP_11_20_ONE);
 
     // Lightness [0,1]
-    J_ASSERT(lightness >= 0);
-    J_ASSERT(lightness <= SFP_11_20_ONE);
+    J_ASSERT(((BSP_LED_HSL_TYPE *)p_hsl)[2] >= 0);
+    J_ASSERT(((BSP_LED_HSL_TYPE *)p_hsl)[2] <= SFP_11_20_ONE);
 
 
     
@@ -71,8 +75,8 @@ void BSP_LED_RGB_from_HSL(BSP_LED_RGB * p_rgb, SFP_11_20 hue, SFP_11_20 sat, SFP
     // Some preshift for the multiplicatin is required because SFP_11_20_ONE
     // will overflow without it.
     SFP_11_20 chroma = SFP_11_20_MULT(
-        SFP_11_20_ONE  - abs((lightness<<1) - SFP_11_20_ONE),
-         sat,
+        SFP_11_20_ONE  - abs((((BSP_LED_HSL_TYPE *)p_hsl)[2]<<1) - SFP_11_20_ONE),
+         ((BSP_LED_HSL_TYPE *)p_hsl)[1],
          5 ,5 );
 
     J_ASSERT(chroma >=0);
@@ -85,7 +89,7 @@ void BSP_LED_RGB_from_HSL(BSP_LED_RGB * p_rgb, SFP_11_20 hue, SFP_11_20 sat, SFP
     
     const SFP_11_20 reciprocal_of_60 = SFP_11_20_new_F(1/60.0f);
     SFP_11_20 hue_dash = SFP_11_20_MULT(
-        hue,
+        ((BSP_LED_HSL_TYPE *)p_hsl)[0],
         reciprocal_of_60,
         15,
         0
@@ -154,7 +158,7 @@ void BSP_LED_RGB_from_HSL(BSP_LED_RGB * p_rgb, SFP_11_20 hue, SFP_11_20 sat, SFP
 
     }
 
-    SFP_11_20 m = lightness - chroma/2;
+    SFP_11_20 m = ((BSP_LED_HSL_TYPE *)p_hsl)[2] - chroma/2;
     
     // The last step from the wiki page is adding m, here we must also multiply
     // with 255 to get the desired scale [0-255]

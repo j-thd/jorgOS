@@ -10,8 +10,15 @@
 #define LED_BLUE (1U << 2)
 #define LED_GREEN (1U << 3)
 
-typedef uint8_t BSP_LED_RGB[3];
+
+// Type definitions allowing for some clarity and consitency
 typedef uint8_t BSP_LED_RGB_TYPE;
+typedef BSP_LED_RGB_TYPE BSP_LED_RGB[3];
+
+
+typedef SFP_11_20 BSP_LED_HSL_TYPE;
+typedef BSP_LED_HSL_TYPE BSP_LED_HSL[3];
+
 
 void BSP_LED_red_off(void);
 void BSP_LED_red_on(void);
@@ -21,11 +28,11 @@ void BSP_LED_blue_off(void);
 void BSP_LED_blue_on(void);
 
 void BSP_LED_set_color_RGB(BSP_LED_RGB*);
-void BSP_LED_set_color_HSL(SFP_11_20, SFP_11_20 , SFP_11_20);
+void BSP_LED_set_color_HSL(BSP_LED_HSL*);
 static void BSP_LED_set_PWM_signal(BSP_LED_RGB*);
 
 
-void BSP_LED_RGB_from_HSL(BSP_LED_RGB*, SFP_11_20, SFP_11_20, SFP_11_20);
+void BSP_LED_RGB_from_HSL(BSP_LED_RGB*, BSP_LED_HSL*);
 
 // LED colours with PWM
 void BSP_LED_PWM_init(void);
