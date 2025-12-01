@@ -61,7 +61,7 @@ void OS_init(){
 }
 
 void OS_delay(uint32_t ticks_delay){
-    __disable_irq(); // Race condition galore here. OS_current cannot switch in the meantime, and neither can be the readyset bits be altered.
+    J_CRIT_SEC_START(); // Race condition galore here. OS_current cannot switch in the meantime, and neither can be the readyset bits be altered.
 
     // OS_delay must not be called in the idle thread.
     J_REQUIRE(OS_curr != OS_thread_list[0]);
@@ -82,7 +82,7 @@ void OS_delay(uint32_t ticks_delay){
     OS_delayed_set |= 1U << priority_bit;
     // Schedule the next thread, because we want to get out of this thread, of course!
     OS_schedule();
-    __enable_irq();
+    J_CRIT_SEC_END();
 }
 
 /// @brief OS_sema_block. Should not be called by user but only by
@@ -492,7 +492,7 @@ void OS_EventQueue_Thread_start(
 
 void OS_EventQueue_pump(void){
     // Checks for the first time the event_queue runs.
-    // The current thread must be an 
+    // The current thread must be an EQ thread
     J_ASSERT_EVENTQUEUE_THREAD(OS_curr);
     // Check if an event handler is assigned
     J_ASSERT( ((OS_EventQueue_Thread*)OS_curr)->event_handler != (void *)0 );
@@ -538,7 +538,7 @@ void OS_EventQueue_pump(void){
         // This is where the thread is guaranteed to switch if the queue was
         // empty, because the scheduler was called. This means multiple events
         // can be handled each time the thread is activated. The OS will also
-        // intervene here if the thread has been running longer a tick and
+        // intervene here if the thread has been running longer than a tick and
         // another higher priority thread is ready now. This gives an
         // interesting insight in my scheduler and event handling solution. I
         // should not want the event handling to take longer than a tick so the
