@@ -2,6 +2,7 @@
 
 #include "TM4C123.h"
 #include "bsp.h"
+#include "bsp_timer.h"
 #include "bsp_led.h"
 #include "jorgOS.h"
 #include "jEventQueueThread.h"
@@ -77,40 +78,21 @@ void blinky_blue(void){
     }
 }
 
-#define BLINKY_GREEN_STACKSIZE 100U
-#define PRIO_BLINKY_GREEN 2U
-uint32_t blinky_green_stack[BLINKY_GREEN_STACKSIZE];
-OS_Thread blinky_green_thread;
+#define ONE_SECOND_PRINT_STACKSIZE 100U
+#define PRIO_ONE_SECOND_PRINT 32U
+uint32_t one_second_print_stack[ONE_SECOND_PRINT_STACKSIZE];
+OS_Thread one_second_print_thread;
 
-void blinky_green(void){
-    JSM_PRINTF("BLINKY GREEN\n");
+void one_second_print(void){
+    JSM_PRINTF("ONE SECOND PRINT...\n");
     while(1) {
         J_ASSERT_TCB_INTEGRITY;
-        J_ASSERT_STACK_INTEGRITY(blinky_green_stack, BLINKY_GREEN_STACKSIZE);
-        static uint8_t green_brightness = 0;
-        ++green_brightness;
-        //BSP_LED_set_color(0, green_brightness, 0);   
-        OS_delay(BSP_TICKS_PER_SEC / 4U); 
+        J_ASSERT_STACK_INTEGRITY(one_second_print_stack, ONE_SECOND_PRINT_STACKSIZE);   
+        OS_delay(BSP_TICKS_PER_SEC); 
+        JSM_PRINTF("[%i] 1 second later....\n", BSP_get_time_millis());
     }
 }
 
-#define BLINKY_CHANGE_STACKSIZE 100U
-#define PRIO_BLINKY_CHANGE 3U
-uint32_t blinky_change_stack[BLINKY_CHANGE_STACKSIZE];
-OS_Thread blinky_change_thread;
-
-void blinky_change(void){
-    JSM_PRINTF("BLINKY CHANGE\n");
-    while(1) {
-        J_ASSERT_TCB_INTEGRITY;
-        J_ASSERT_STACK_INTEGRITY(blinky_change_stack, BLINKY_CHANGE_STACKSIZE);
-        static uint8_t change_brightness = 0;
-        BSP_LED_red_on()   ;
-        OS_delay(BSP_TICKS_PER_SEC / 100U); 
-        BSP_LED_red_off()   ;
-        OS_delay(BSP_TICKS_PER_SEC / 100U); 
-    }
-}
 
 #define SEMA_RED_STACKSIZE 100U
 #define PRIO_SEMA_RED 10U
@@ -247,9 +229,11 @@ void bsp_event_handler(J_Event e){
 int main(void) {    
     
     BSP_init();
+    JSM_PRINTF("[%i] BSP initialized...\n", BSP_get_time_millis());
     BSP_LED_set_color_HSL(&hsl);
 
     OS_init();
+    JSM_PRINTF("[%i] OS initialized...\n", BSP_get_time_millis());
 
     // Initialize semaphores and mutexes
     J_sema_init(&sema_test, 0, 10);
@@ -266,11 +250,8 @@ int main(void) {
     OS_Thread_start(&blinky_blue_thread, PRIO_BLINKY_BLUE, &blinky_blue, 
         blinky_blue_stack, sizeof(blinky_blue_stack));
     
-    OS_Thread_start(&blinky_green_thread, PRIO_BLINKY_GREEN, &blinky_green, 
-        blinky_green_stack, sizeof(blinky_green_stack));
-    
-    OS_Thread_start(&blinky_change_thread, PRIO_BLINKY_CHANGE, &blinky_change, 
-        blinky_change_stack, sizeof(blinky_change_stack));
+    OS_Thread_start(&one_second_print_thread, PRIO_ONE_SECOND_PRINT, &one_second_print, 
+        one_second_print_stack, sizeof(one_second_print_stack));
 
     // Sema test threads
     OS_Thread_start(&sema_red_thread, PRIO_SEMA_RED, &sema_red, 
@@ -290,6 +271,8 @@ int main(void) {
     OS_EventQueue_Thread_start(&event_test_eq_thread, PRIO_EVENT_TEST, &event_test_handler,
         event_test_stack, sizeof(event_test_stack), // Stack
         event_test_event_buffer, EVENT_TEST_EVENT_BUFFER_SIZE); // EventQueue buffer
+    
+    JSM_PRINTF("[%i] Registered all threads. Running OS...\n", BSP_get_time_millis());
     OS_run();
 
     // After the first thread is scheduled, OS_run() should never return.

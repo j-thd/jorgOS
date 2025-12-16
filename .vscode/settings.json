@@ -22,7 +22,9 @@
         "bsp_led.h": "c",
         "jtest.h": "c",
         "cstdlib": "c",
-        "uart.h": "c"
+        "uart.h": "c",
+        "bsp_clock.h": "c",
+        "bsp_timer.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false,
     "makefile.configureOnOpen": false

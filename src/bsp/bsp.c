@@ -2,6 +2,7 @@
 
 #include "runtime_environment.h"
 #include "bsp.h"
+#include "bsp_timer.h"
 #include "bsp_led.h"
 #include "jorgOS.h"
 #include "jEventQueueThread.h"
@@ -19,6 +20,8 @@ void BSP_init(void){
     GPIOF_AHB->DIR |= ( LED_RED | LED_BLUE | LED_GREEN ); //Set Pin direction on pin 1, 2, 3 as output.
     GPIOF_AHB->DEN |= ( LED_RED | LED_BLUE | LED_GREEN ); // Digital Enable 
 
+   
+
     // Initialize PWM to drive the LEDs
     BSP_LED_PWM_init();
 
@@ -28,6 +31,8 @@ void BSP_init(void){
 
     // Enable UART0 which communicates over the USB by default
     UART0_init(9600);
+
+
     // Use UART0 for the jorgOS Serial Monitor (using printf)
     #ifdef JSM_ENABLE
     JSM_init(UART0);
@@ -35,6 +40,8 @@ void BSP_init(void){
     JSM_transmit_buffer();
     #endif //JSM_ENABLE
 
+    // Initialize the timers
+    BSP_timer_init();
 
 
 }
@@ -91,9 +98,6 @@ void BSP_tick(){
         }
     }
 
-    //BSP_LED_red_off();
-    // Update the LED
-    //BSP_LED_update();
 }
 
 void BSP_register_EQT_thread(OS_EventQueue_Thread * eqt_thread){

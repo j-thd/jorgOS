@@ -71,7 +71,7 @@ void BSP_LED_RGB_from_HSL(BSP_LED_RGB * p_rgb, BSP_LED_HSL* p_hsl){
 
 
     
-    JSM_transmit_buffer();
+    //JSM_transmit_buffer();
     // Some preshift for the multiplicatin is required because SFP_11_20_ONE
     // will overflow without it.
     SFP_11_20 chroma = SFP_11_20_MULT(
