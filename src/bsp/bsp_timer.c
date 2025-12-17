@@ -72,7 +72,7 @@ void BSP_timer_init(){
 
 
     SystemCoreClockUpdate();
-    JSM_PRINTF("BSP: init timer. SysCoreClock Freq.: %i\n", SystemCoreClock);
+    JSM_PRINTF("BSP: init timer. SysCoreClock Freq.: %u\n", SystemCoreClock);
     // First get the value to pre-scale too, and ensure it fits the prescaler
     // range of at most 16 bits. We are using the 32-bit WIDE timer because we
     // want to use the prescaler, which is only available in this mode.
@@ -85,7 +85,7 @@ void BSP_timer_init(){
     // value into a 32-bit register, but otherwise we would have to ensure.
     // Actually, the OR operation makes the cast unnecessary.
     WTIMER0->TAPR |= (uint16_t)prescale_Timer0_A;
-    JSM_PRINTF("BSP: init timer. Timer A, Prescale.: %i\n", prescale_Timer0_A);
+    JSM_PRINTF("BSP: init timer. Timer A, Prescale.: %u\n", prescale_Timer0_A);
 
     // Skip the parts of the that enable interrupts, we don't need these for
     // now, we just want to read the register.
@@ -95,5 +95,5 @@ void BSP_timer_init(){
 }
 
 uint32_t BSP_get_time_millis(){
-    return WTIMER0->TAV;
+    return WTIMER_0_A_STARTING_COUNT - WTIMER0->TAV;
 }

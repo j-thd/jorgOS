@@ -89,7 +89,7 @@ void one_second_print(void){
         J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(one_second_print_stack, ONE_SECOND_PRINT_STACKSIZE);   
         OS_delay(BSP_TICKS_PER_SEC); 
-        JSM_PRINTF("[%i] 1 second later....\n", BSP_get_time_millis());
+        JSM_PRINTF("[%u] 1 second later....\n", BSP_get_time_millis());
     }
 }
 
@@ -148,7 +148,7 @@ J_Event event_test_event_buffer[EVENT_TEST_EVENT_BUFFER_SIZE];
 // The event handler
 
 void event_test_handler(J_Event e){
-    //JSM_PRINTF("Event %i\n", e.sig);
+    //JSM_PRINTF("Event %u\n", e.sig);
     JSM_transmit_buffer();
     switch (e.sig)
     {
@@ -181,7 +181,7 @@ BSP_LED_HSL hsl = {
 
 // BSP event handler
 void bsp_event_handler(J_Event e){
-    //JSM_PRINTF("Event %i\n", e.sig);
+    //JSM_PRINTF("Event %u\n", e.sig);
     JSM_transmit_buffer();
     switch (e.sig)
     {
@@ -229,11 +229,11 @@ void bsp_event_handler(J_Event e){
 int main(void) {    
     
     BSP_init();
-    JSM_PRINTF("[%i] BSP initialized...\n", BSP_get_time_millis());
+    JSM_PRINTF("[%u] BSP initialized...\n", BSP_get_time_millis());
     BSP_LED_set_color_HSL(&hsl);
 
     OS_init();
-    JSM_PRINTF("[%i] OS initialized...\n", BSP_get_time_millis());
+    JSM_PRINTF("[%u] OS initialized...\n", BSP_get_time_millis());
 
     // Initialize semaphores and mutexes
     J_sema_init(&sema_test, 0, 10);
@@ -272,7 +272,7 @@ int main(void) {
         event_test_stack, sizeof(event_test_stack), // Stack
         event_test_event_buffer, EVENT_TEST_EVENT_BUFFER_SIZE); // EventQueue buffer
     
-    JSM_PRINTF("[%i] Registered all threads. Running OS...\n", BSP_get_time_millis());
+    JSM_PRINTF("[%u] Registered all threads. Running OS...\n", BSP_get_time_millis());
     OS_run();
 
     // After the first thread is scheduled, OS_run() should never return.

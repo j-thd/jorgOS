@@ -25,4 +25,8 @@
 void BSP_timer_init();
 uint32_t BSP_get_time_millis();
 
+// Calculation constants
+#define WTIMER_0_A_STARTING_COUNT 0xFFFFFFFF // Reset value in Interval Load register before counting down
+
+
 #endif // __BSP_TIMER_H
