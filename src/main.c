@@ -10,6 +10,7 @@
 #include "jSema.h"
 #include "jMutex.h"
 #include "runtime_environment.h"
+#include "led_manager.h"
 
 
 // Semaphore test
@@ -194,30 +195,27 @@ void bsp_event_handler(J_Event e){
         // Testing the semaphore.
        
         JSM_PRINTF("BUTTON 1 PRESSED\n");
+        LM_set_active_mode(LM_ALWAYS_ON_MODE, true);
         
         //J_sema_signal(&sema_test);
-
-        hsl[2] = (hsl[2] + SFP_11_20_ONE / 64) % SFP_11_20_ONE;
-        JSM_PRINTF("L: {%1.5f}\n", SFP_11_20_TO_FLOAT(hsl[2]));
-        BSP_LED_set_color_HSL(&hsl);
 
         break;
 
     case BUTTON_1_RELEASED:
         JSM_PRINTF("BUTTON 1 RELEASED\n");
+        LM_set_active_mode(LM_BLINKING_MODE, true);
         break;
 
     case BUTTON_2_DEPRESSED:
         // Test cycling through hues.
-        hsl[0] = (hsl[0] + SFP_11_20_ONE * 60)  % (SFP_11_20_ONE*360);
-
-        BSP_LED_set_color_HSL(&hsl);
 
         JSM_PRINTF("BUTTON 2 PRESSED\n");
+        LM_set_active_mode(LM_ALWAYS_ON_MODE, true);
         break;
 
     case BUTTON_2_RELEASED:
         JSM_PRINTF("BUTTON 2 RELEASED\n");
+        LM_set_active_mode(LM_HUE_SHIFTING_MODE, true);
         break;
 
     default:
@@ -226,11 +224,22 @@ void bsp_event_handler(J_Event e){
     }
 }
 
-int main(void) {    
-    
+int main(void) {
     BSP_init();
     JSM_PRINTF("[%u] BSP initialized...\n", BSP_get_time_millis());
+    JSM_PRINTF("&HSL[0]: 0x%08X\n", &hsl[0]);
+    JSM_PRINTF("HSL[0]: %i\n", hsl[0]);
+    JSM_PRINTF("HSL[1]: %i\n", hsl[1]);
+    JSM_PRINTF("HSL[2]: %i\n", hsl[2]);
     BSP_LED_set_color_HSL(&hsl);
+    
+    LM_init(LM_BLINKING_MODE);
+    JSM_PRINTF("[%u] LM initialized...\n", BSP_get_time_millis());
+    BSP_LED_HSL hsl_3 = {0, SFP_11_20_ONE, SFP_11_20_ONE };
+    LM_config_always_on_mode(&hsl_3);
+    BSP_LED_HSL hsl_2 = { SFP_11_20_ONE*240, SFP_11_20_ONE, SFP_11_20_ONE /2 };
+    LM_config_blinking_mode(&hsl_2,2000U, 1000U);
+    LM_config_hue_shifting_mode(&hsl_2, 1000U);
 
     OS_init();
     JSM_PRINTF("[%u] OS initialized...\n", BSP_get_time_millis());
@@ -281,4 +290,13 @@ int main(void) {
 
     
     //return 0;
+}
+
+void OS_onIdle(void){
+    #ifdef JSM_ENABLE
+    JSM_transmit_buffer();
+    #endif // JSM_ENABLE
+    LM_tick();
+    
+    __WFI();
 }

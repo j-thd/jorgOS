@@ -26,6 +26,6 @@
         "bsp_clock.h": "c",
         "bsp_timer.h": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.variableUseNaturalFormat": true,
     "makefile.configureOnOpen": false
 }

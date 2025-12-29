@@ -135,16 +135,6 @@ void SysTick_Handler(void){
     J_CRIT_SEC_END();
 }
 
-void OS_onIdle(void){
-    #ifdef JSM_ENABLE
-    //GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
-    JSM_transmit_buffer();
-    //GPIOF_AHB->DATA_BITS[(LED_RED)] = 0;
-    #endif // JSM_ENABLE
-    
-    __WFI();
-}
-
 void OS_onStartup(void){
     SystemCoreClockUpdate();
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);

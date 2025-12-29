@@ -33,18 +33,18 @@ static void BSP_LED_set_PWM_signal(BSP_LED_RGB * p_rgb){
     // MAX LOAD value was 10k at time of writing code, so 16-bit is enough
 
     // The signal is inverted so CMP values actually drive the target high now.
-    // The inversion stops the tiny blip of light when you went the LED to be dark.
+    // The inversion stops the tiny blip of light when you want the LED to be dark.
 
     // The "order" of the PWM signals is rBG instead or rGB.
     PWM1->_2_CMPB = (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
     PWM1->_3_CMPA = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
     PWM1->_3_CMPB = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
 
-    JSM_PRINTF("\nR: %i\tG: %i\tB: %i\n", 
-        ((BSP_LED_RGB_TYPE *)p_rgb)[0], 
-        ((BSP_LED_RGB_TYPE *)p_rgb)[1], 
-        ((BSP_LED_RGB_TYPE *)p_rgb)[2]
-    );
+    // JSM_PRINTF("\nR: %i\tG: %i\tB: %i\n", 
+    //     ((BSP_LED_RGB_TYPE *)p_rgb)[0], 
+    //     ((BSP_LED_RGB_TYPE *)p_rgb)[1], 
+    //     ((BSP_LED_RGB_TYPE *)p_rgb)[2]
+    // );
 
 }
 

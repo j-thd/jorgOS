@@ -61,9 +61,10 @@ inc_custom_cmsis := C:\code\custom-cmsis
 inc_arm_core_cmsis := C:\code\custom-cmsis\CMSIS-arm-default\Core\Include
 inc_bsp := ./src/bsp
 inc_jlib = ./src/jlib
+inc_features := ./src/features
 inc_runtime_environment := ./src/runtime_environment
 inc_os := ./src/jorgOS
-INC_PATH := $(inc_bsp) $(inc_jlib) $(inc_runtime_environment) $(inc_os)
+INC_PATH := $(inc_bsp) $(inc_jlib) $(inc_features) $(inc_runtime_environment) $(inc_os)
 inc_path_string := $(addprefix -I, $(INC_PATH))
 
 # Definitions to pass to compiler

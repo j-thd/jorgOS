@@ -31,7 +31,7 @@
             "preLaunchTask": "Build JTest-file for host"
         },
         {
-            "name": "Cortex",
+            "name": "Launch Main",
             "cwd": "${workspaceRoot}",
             "executable": "./build/image/TM4C123GH6PM.axf",
             "type": "cortex-debug",
@@ -42,7 +42,24 @@
             "searchDir": ["C:\\tools\\openocd\\xpack-openocd-0.12.0-3\\openocd\\scripts\\board"],
             "configFiles": ["ti_ek-tm4c123gxl.cfg"],
             "svdFile": "./device/TM4C123GH6PM/TM4C123GH6PM.svd",
-            "runToMain": true,
+            "runToMain": false,
+            "showDevDebugOutput": "raw"
+            //"cmsisPack": "${command:device-manager.getDevicePack}"
+        },
+        {
+            "name": "Attach Main",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/image/TM4C123GH6PM.axf",
+            "type": "cortex-debug",
+            "request": "attach",
+            "servertype": "openocd",
+            "interface": "jtag",
+            "device": "TM4C123GH6PM",
+            "searchDir": ["C:\\tools\\openocd\\xpack-openocd-0.12.0-3\\openocd\\scripts\\board"],
+            "configFiles": ["ti_ek-tm4c123gxl.cfg"],
+            "svdFile": "./device/TM4C123GH6PM/TM4C123GH6PM.svd",
+            "runToMain": false,
+            "showDevDebugOutput": "raw"
             //"cmsisPack": "${command:device-manager.getDevicePack}"
         },
                 {
