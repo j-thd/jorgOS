@@ -11,13 +11,6 @@
 void BSP_init(void);
 void BSP_tick(void);
 
-// Switches
-#define SWITCH_1 (1U << 4)
-#define SWITCH_2 (1U << 0)
-
-void BSP_SWITCH_1_init(void);
-void BSP_SWITCH_2_init(void);
-
 // BSP Events
 void BSP_register_EQT_thread(OS_EventQueue_Thread *);
 // BSP signals

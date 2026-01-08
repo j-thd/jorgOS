@@ -325,7 +325,7 @@ void OS_schedule(void){
         }
         else {
             // If the thread is blocked, check it was not an eventqueue thread.
-            // That should enver happend
+            // That should never happen
             J_ASSERT_NOT_EVENTQUEUE_THREAD(OS_next);
             // If the thread is blocked, OS_check_for_ready can be called, which
             // will handle it based on the blocking reason (mutex or semaphore)

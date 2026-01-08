@@ -11,6 +11,7 @@
 #include "jMutex.h"
 #include "runtime_environment.h"
 #include "led_manager.h"
+#include "qei.h"
 
 
 // Semaphore test
@@ -79,18 +80,41 @@ void blinky_blue(void){
     }
 }
 
+#define ENCODER_MONITOR_STACKSIZE 100U
+#define PRIO_ENCODER_MONITOR 31U
+uint32_t encoder_monitor_stack[ENCODER_MONITOR_STACKSIZE];
+OS_Thread encoder_monitor_thread;
+
+void encoder_monitor(void){
+    JSM_PRINTF("Encoder monitor.\n");
+
+    // Monitor the QEI_0 position, and create events for the knob moving and/or
+    // down.
+    
+    // First, we get the current position, and every-time we simply check if the
+    // qei travelled up or down, emitting multiple events if the knob turned up
+    // multiple times.
+
+    while(1) {
+        J_ASSERT_TCB_INTEGRITY;
+        J_ASSERT_STACK_INTEGRITY(encoder_monitor_stack, ENCODER_MONITOR_STACKSIZE);   
+        OS_delay(BSP_TICKS_PER_SEC/10U); 
+        JSM_PRINTF("QEI 0 Pos: %u\n", QEI_0_get_position());
+    }
+}
+
 #define ONE_SECOND_PRINT_STACKSIZE 100U
 #define PRIO_ONE_SECOND_PRINT 32U
 uint32_t one_second_print_stack[ONE_SECOND_PRINT_STACKSIZE];
 OS_Thread one_second_print_thread;
 
 void one_second_print(void){
-    JSM_PRINTF("ONE SECOND PRINT...\n");
+    JSM_PRINTF("TWO SECOND PRINT...\n");
     while(1) {
         J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(one_second_print_stack, ONE_SECOND_PRINT_STACKSIZE);   
-        OS_delay(BSP_TICKS_PER_SEC); 
-        JSM_PRINTF("[%u] 1 second later....\n", BSP_get_time_millis());
+        OS_delay(2*BSP_TICKS_PER_SEC); 
+        JSM_PRINTF("[%u] 2 second later....\n", BSP_get_time_millis());
     }
 }
 
@@ -227,10 +251,6 @@ void bsp_event_handler(J_Event e){
 int main(void) {
     BSP_init();
     JSM_PRINTF("[%u] BSP initialized...\n", BSP_get_time_millis());
-    JSM_PRINTF("&HSL[0]: 0x%08X\n", &hsl[0]);
-    JSM_PRINTF("HSL[0]: %i\n", hsl[0]);
-    JSM_PRINTF("HSL[1]: %i\n", hsl[1]);
-    JSM_PRINTF("HSL[2]: %i\n", hsl[2]);
     BSP_LED_set_color_HSL(&hsl);
     
     LM_init(LM_BLINKING_MODE);
@@ -239,7 +259,7 @@ int main(void) {
     LM_config_always_on_mode(&hsl_3);
     BSP_LED_HSL hsl_2 = { SFP_11_20_ONE*240, SFP_11_20_ONE, SFP_11_20_ONE /2 };
     LM_config_blinking_mode(&hsl_2,2000U, 1000U);
-    LM_config_hue_shifting_mode(&hsl_2, 1000U);
+    LM_config_hue_shifting_mode(&hsl_2, 30000U);
 
     OS_init();
     JSM_PRINTF("[%u] OS initialized...\n", BSP_get_time_millis());
@@ -261,6 +281,9 @@ int main(void) {
     
     OS_Thread_start(&one_second_print_thread, PRIO_ONE_SECOND_PRINT, &one_second_print, 
         one_second_print_stack, sizeof(one_second_print_stack));
+
+    OS_Thread_start(&encoder_monitor_thread, PRIO_ENCODER_MONITOR, &encoder_monitor, 
+        encoder_monitor_stack, sizeof(encoder_monitor_stack));
 
     // Sema test threads
     OS_Thread_start(&sema_red_thread, PRIO_SEMA_RED, &sema_red, 
