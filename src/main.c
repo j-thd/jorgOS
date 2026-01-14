@@ -165,7 +165,7 @@ void sema_test_signal(void){
 // Create an EventQueue Thread, which also needs to be passed a J_event buffer
 #define EVENT_TEST_STACKSIZE 100U
 #define PRIO_EVENT_TEST 4U
-#define EVENT_TEST_EVENT_BUFFER_SIZE 10U
+#define EVENT_TEST_EVENT_BUFFER_SIZE 100U
 uint32_t event_test_stack[EVENT_TEST_STACKSIZE];
 OS_EventQueue_Thread event_test_eq_thread;
 J_Event event_test_event_buffer[EVENT_TEST_EVENT_BUFFER_SIZE];
@@ -240,6 +240,14 @@ void bsp_event_handler(J_Event e){
     case BUTTON_2_RELEASED:
         JSM_PRINTF("BUTTON 2 RELEASED\n");
         LM_set_active_mode(LM_HUE_SHIFTING_MODE, true);
+        break;
+
+    case KNOB_1_CLOCKWISE:
+        JSM_PRINTF("KNOB 1 TURNED CLOCKWISE\n");
+        break;
+
+    case KNOB_1_ANTI_CLOCKWISE:
+        JSM_PRINTF("KNOB 1 TURNED ANTI-CLOCKWISE\n");
         break;
 
     default:

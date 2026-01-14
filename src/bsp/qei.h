@@ -2,6 +2,7 @@
 #define __QEI_H__
 
 #include <stdint.h>
+#include "jEventQueueThread.h"
 
 // Defined constants
 #define RCGCQEI_R0 0U
@@ -28,5 +29,7 @@
 
 void QEI_0_init(void);
 uint32_t QEI_0_get_position(void);
+void QEI_tick(OS_EventQueue_Thread *);
+
 
 #endif // __QEI_H__

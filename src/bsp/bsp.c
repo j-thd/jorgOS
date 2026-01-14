@@ -56,6 +56,7 @@ void BSP_init(void){
 void BSP_tick(){
     J_REQUIRE_IN_CRIT_SEC;
     BSP_switch_tick(BSP_EQT_thread);
+    QEI_tick(BSP_EQT_thread);
 }
 
 void BSP_register_EQT_thread(OS_EventQueue_Thread * eqt_thread){
