@@ -144,6 +144,12 @@ A list to showcase in more detail what has been done and or/learned.
   - Checking register contents
   - Monitoring through serial monitor
   - Attaching a Logic Analyzer
+  - Examples:
+    - Debugged apparent broken context-switch after switching the toolchain.
+      Turned out to be that FPU settings were not as expected, which affects
+      what is and must be pushed onto the stack. This was found out by closely
+      inspecting the Link Register and noticing the MCU was not running in the
+      expected mode based on its contents.
 
 
 
