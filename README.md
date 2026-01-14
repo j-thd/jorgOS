@@ -81,8 +81,10 @@ A list to showcase in more detail what has been done and or/learned.
     - Flashing
     - Cleaning
   - Self-made testing framework
-    - Implemented with preprocessor macros for defining test-cases
-    - Allows for testing on the host machine or the target
+    - Implemented with convenient preprocessor macros for defining test groups
+      and test-cases.
+    - Can run on both host and target device
+      - Call-backs implemented in BSP to monitor test progress over Serial Monitor
   - Macro-based asserts through-out the code to achieve some form of
     design-by-contract approach.
       - Can later be reconfigured for fault detection and recovery.
@@ -101,6 +103,7 @@ A list to showcase in more detail what has been done and or/learned.
     - HSL-to-RGB conversion based
   - Math utlity functions
   - Forward declarations to break cyclic dependencies.
+  - Name-spacing own functions to avoid potential clashes.
 
 - Assembly / assembler
   - For the context switch in the PendSV Handler.
