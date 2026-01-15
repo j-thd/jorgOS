@@ -10,7 +10,11 @@ Self-education and pet project in which I have done, among many other things, th
 But still, some startup code was altered or written by me.
 
 Disclaimer: _the code you will see is an first effort to get things done, the
-code is not cleaned up when I understand the underlying embedded development concept well enough to move to the next task. It is not an effort to demonstrate clean coding skills. ;)_
+code is not cleaned up when I understand the underlying embedded development
+concept well enough to move to the next learning goal. It is not an effort to demonstrate
+clean coding skills. ;) The code is also littered with comments where I "talk to
+myself" when trying to learn what is going on. I found it to be helpful for
+education purposes, but it does make for a lot of comments that are not always useful._
 
 # Current state and overview of capabilities
 
