@@ -34,7 +34,7 @@ We enter `main()` and call:
   - `OS_init()` to initialize "jorgOS", the self-made multi-threaded operating system.
       - Set the priority of the PendSV interrupt to the lowest level, to
         ensure other interrupts complete first.
-      - Enable Critical Section manager to allow the OS to properly deal with
+      - Enable the Critical Section Manager to allow the OS to properly deal with
         nested critical sections.
       - Register the idle thread, which contains a callback to a user-defined
         `OS_onIdle()` function for dealing with low priority tasks, such as
@@ -48,7 +48,7 @@ We enter `main()` and call:
   - `OS_Thread_start()` to register various threads:
       - Several dummy threads that used to blink different parts of the LGB to
         demonstrate that the jorgOS scheduler is working, and correctly prioritizing
-        and delaying threads. A logic analyzer was used to show correct
+        and delaying threads. A logic analyser was used to show correct
         behaviour. LED behaviour has since moved to the PWM.
       - Several threads to test proper working of semaphores and mutexes of, and
         that threads are blocked/unblocked with correct priority and timing.
@@ -64,13 +64,15 @@ We enter `main()` and call:
     - Exiting the critical section, which allows the PendSV Interrupt to
       trigger, which does the context switch between threads.
 
-`OS_run()` is never returned from, as the context never switches back.
+`OS_run()` is never returned from, as the context never switches back and
+control is handed over the the created threads. The OS only intervenes through
+interrupts and scheduling new threads from this point on.
 
 # Detailed list of features, things learned and/or debugged
 
 A list to showcase in more detail what has been done and or/learned.
 
-- Toolchain
+- Setting up a development toolchain
   - Configuring VS Code to work with:
     - `armclang`
     - Debugging the target with the generated `.axf` file.
@@ -84,14 +86,15 @@ A list to showcase in more detail what has been done and or/learned.
     - Implemented with convenient preprocessor macros for defining test groups
       and test-cases.
     - Can run on both host and target device
-      - Call-backs implemented in BSP to monitor test progress over Serial Monitor
+      - Call-backs implemented in BSP to monitor test progress over Serial
+        Monitor when running on the target device
   - Macro-based asserts through-out the code to achieve some form of
     design-by-contract approach.
       - Can later be reconfigured for fault detection and recovery.
 
 - C
 
-  _Too much to keep track of, so this is a selection:_
+  _Too much to keep track of, so this is a selection of not too basic stuff:_
   - OOP in C with structs.
     - Encapsulation with `typedef struct` and clear namespacing.
     - Composition
@@ -101,9 +104,16 @@ A list to showcase in more detail what has been done and or/learned.
   - Fixed-point arithmetic
     - Macro-based
     - HSL-to-RGB conversion based
-  - Math utlity functions
+  - Math utility functions
   - Forward declarations to break cyclic dependencies.
   - Name-spacing own functions to avoid potential clashes.
+  - Overriding `fputc()` to make `printf()` use the self-made Serial Monitor
+  - ARM procedure call standard (APCS)
+  - Correctly using pointers when:
+    - Up/down-casting to achieve inheritance
+    - Function handlers
+    - Using pointer arithmetic for ring buffers
+    - Using more complex typedefs
 
 - Assembly / assembler
   - For the context switch in the PendSV Handler.
@@ -121,7 +131,6 @@ A list to showcase in more detail what has been done and or/learned.
     - Mutexes
     - Semaphores
   - Nested critical sections
-    - OS integ
 
 - Peripherals
   - Implemented through the Board Support Package(BSP) design pattern.
@@ -141,15 +150,16 @@ A list to showcase in more detail what has been done and or/learned.
     - Used for the serial monitor
 
 - Debugging
-  - Checking register contents
+  - Checking register contents and understanding their specific purposes
   - Monitoring through serial monitor
-  - Attaching a Logic Analyzer
+  - Attaching a Logic Analyser
   - Example of problems that were solved:
     - Debugged apparent broken context-switch after switching the toolchain.
       Turned out to be that FPU settings were not as expected, which affects
       what is and must be pushed onto the stack. This was found out by closely
       inspecting the Link Register and noticing the MCU was not running in the
       expected FPU mode based on its contents.
+  - Design-by-contract style asserts
 
 
 
