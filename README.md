@@ -81,10 +81,10 @@ A list to showcase in more detail what has been done and or/learned.
     - `armclang`
     - Debugging the target with the generated `.axf` file.
   - Makefiles
-    - Compiling
-    - Linking 
+    - Compiling: `armclang` / `gcc` (_host testing with MSYS/MinGW64_)
+    - Linking: `armlink` 
     - Dependency file generation
-    - Flashing
+    - Flashing: `lmflash`
     - Cleaning
   - Self-made testing framework
     - Implemented with convenient preprocessor macros for defining test groups
@@ -157,13 +157,15 @@ A list to showcase in more detail what has been done and or/learned.
   - Checking register contents and understanding their specific purposes
   - Monitoring through serial monitor
   - Attaching a Logic Analyser
+  - Design-by-contract style asserts
+  - Inspecting memory lay-out produced by linker.
   - Example of problems that were solved:
     - Debugged apparent broken context-switch after switching the toolchain.
       Turned out to be that FPU settings were not as expected, which affects
       what is and must be pushed onto the stack. This was found out by closely
       inspecting the Link Register and noticing the MCU was not running in the
       expected FPU mode based on its contents.
-  - Design-by-contract style asserts
+
 
 
 
