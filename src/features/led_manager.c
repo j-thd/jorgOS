@@ -13,7 +13,7 @@
 // Initalize all modes to zero
 // This sets Lightness to zero, which means that by default all RGB values are 0.
 BSP_LED_HSL hsl_colour_of_mode[LM_NR_OF_MODES] = { 0 };
-uint8_t active_mode = 0; // 0 Means the MODE is OFF
+LM_mode active_mode = 0; // 0 Means the MODE is OFF
 uint8_t millis_per_tick = 0;
 uint32_t t_start_millis[LM_NR_OF_MODES] = {0}; // Reference time for start of mode
 
@@ -33,7 +33,7 @@ uint16_t hue_shifting_mode_period = 1000U;
 /// @brief the Led Manager LM needs to be initialized, to set a default mode and
 /// to have a time reference.
 /// @param start_mode one of modes defined by led_manager
-void LM_init(uint8_t start_mode){
+void LM_init(LM_mode start_mode){
     J_ASSERT(start_mode <= LM_NR_OF_MODES);
 
     LM_set_active_mode(start_mode, true);
@@ -66,7 +66,7 @@ void LM_tick(){
 
 }
 
-void LM_set_active_mode(uint8_t mode, bool reset){
+void LM_set_active_mode(LM_mode mode, bool reset){
     J_ASSERT(mode <= LM_NR_OF_MODES);
     // Resetting changes the reference time so the effect starts from the beginning
     if (reset){
@@ -165,4 +165,22 @@ void LM_config_hue_shifting_mode(BSP_LED_HSL * hsl, uint16_t period_millis){
 
     // Tick to immediately update
     LM_tick();
+}
+
+/// @brief Copy hsl of the current mode out.
+/// @param mode 
+/// @return BSP_LED_HSL of chosen mode.
+void LM_get_HSL_of_mode(BSP_LED_HSL * hsl, LM_mode mode){
+    J_ASSERT(mode <= LM_NR_OF_MODES);
+    // TODO: start using memcpy_s instead for safety.
+    memcpy( hsl, hsl_colour_of_mode[mode], sizeof(BSP_LED_HSL));
+
+}
+
+void LM_set_HSL_of_mode(LM_mode mode, BSP_LED_HSL * hsl){
+    J_ASSERT(mode <= LM_NR_OF_MODES);
+    memcpy(hsl_colour_of_mode[mode], hsl, sizeof(BSP_LED_HSL));    
+    // Tick to immediately update
+    LM_tick();
+    
 }

@@ -27,11 +27,14 @@
 void LM_init(uint8_t);
 void LM_tick();
 
-#define LM_NR_OF_MODES 3U
+typedef uint8_t LM_mode;
 
-#define LM_ALWAYS_ON_MODE 0U
-#define LM_BLINKING_MODE 1U
-#define LM_HUE_SHIFTING_MODE 2U
+enum LM_modes {
+    LM_ALWAYS_ON_MODE,
+    LM_BLINKING_MODE,
+    LM_HUE_SHIFTING_MODE,
+    LM_NR_OF_MODES // Not a mode but for comparing if modes are valid
+};
 
 void LM_set_active_mode(uint8_t, bool);
 
@@ -43,6 +46,10 @@ static void LM_update_hue_shifting_mode(uint32_t);
 void LM_config_always_on_mode(BSP_LED_HSL *);
 void LM_config_blinking_mode(BSP_LED_HSL *, uint16_t, uint16_t);
 void LM_config_hue_shifting_mode(BSP_LED_HSL *, uint16_t);
+
+//Generic mode setters and getters
+void LM_get_HSL_of_mode(BSP_LED_HSL *, LM_mode mode);
+void LM_set_HSL_of_mode(LM_mode mode, BSP_LED_HSL *);
 
 
 #endif // __LED_MANAGER_H__

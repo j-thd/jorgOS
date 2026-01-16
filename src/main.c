@@ -12,6 +12,7 @@
 #include "runtime_environment.h"
 #include "led_manager.h"
 #include "qei.h"
+#include "jmath.h"
 
 
 // Semaphore test
@@ -98,7 +99,7 @@ void encoder_monitor(void){
     while(1) {
         J_ASSERT_TCB_INTEGRITY;
         J_ASSERT_STACK_INTEGRITY(encoder_monitor_stack, ENCODER_MONITOR_STACKSIZE);   
-        OS_delay(BSP_TICKS_PER_SEC/10U); 
+        OS_delay(BSP_TICKS_PER_SEC); 
         JSM_PRINTF("QEI 0 Pos: %u\n", QEI_0_get_position());
     }
 }
@@ -165,7 +166,7 @@ void sema_test_signal(void){
 // Create an EventQueue Thread, which also needs to be passed a J_event buffer
 #define EVENT_TEST_STACKSIZE 100U
 #define PRIO_EVENT_TEST 4U
-#define EVENT_TEST_EVENT_BUFFER_SIZE 100U
+#define EVENT_TEST_EVENT_BUFFER_SIZE 10U
 uint32_t event_test_stack[EVENT_TEST_STACKSIZE];
 OS_EventQueue_Thread event_test_eq_thread;
 J_Event event_test_event_buffer[EVENT_TEST_EVENT_BUFFER_SIZE];
@@ -191,7 +192,7 @@ void event_test_handler(J_Event e){
 // Create an EventQueue Thread solely for responding to events the BSP produces.
 #define BSP_EQT_STACKSIZE 100U
 #define PRIO_BSP_EQT 17U
-#define BSP_EQT_EVENT_BUFFER_SIZE 5U
+#define BSP_EQT_EVENT_BUFFER_SIZE 10U
 uint32_t bsp_eqt_stack[BSP_EQT_STACKSIZE];
 OS_EventQueue_Thread bsp_eqt_thread;
 J_Event bsp_eqt_event_buffer[BSP_EQT_EVENT_BUFFER_SIZE];
@@ -243,11 +244,39 @@ void bsp_event_handler(J_Event e){
         break;
 
     case KNOB_1_CLOCKWISE:
-        JSM_PRINTF("KNOB 1 TURNED CLOCKWISE\n");
+        JSM_PRINTF("KNOB 1 TURNED CLOCKWISE %u times\n", e.repeats+1);
+        // Increase lightness if knob gets turned up
+        { // Block-scope to allow re-using hsl as name for clarity. Not sure if this is good practice.
+        BSP_LED_HSL hsl;
+        LM_get_HSL_of_mode(&hsl, LM_HUE_SHIFTING_MODE);
+        JSM_PRINTF("H: %i, S: %i, L: %i\n", hsl[0],hsl[1],hsl[2]);
+        hsl[2] += SFP_11_20_ONE/100U*(e.repeats+1);
+        // Clamp to one
+        if ( hsl[2] > SFP_11_20_ONE){
+            hsl[2] = SFP_11_20_ONE;
+         }
+        JSM_PRINTF("New lightness: %i\n", hsl[2]);
+        JSM_PRINTF("H: %i, S: %i, L: %i\n", hsl[0],hsl[1],hsl[2]);
+        LM_set_HSL_of_mode(LM_HUE_SHIFTING_MODE, &hsl);
+        }
+
         break;
 
     case KNOB_1_ANTI_CLOCKWISE:
-        JSM_PRINTF("KNOB 1 TURNED ANTI-CLOCKWISE\n");
+        JSM_PRINTF("KNOB 1 TURNED ANTI-CLOCKWISE %u times\n", e.repeats+1);
+        // Decrease lightness if knob gets turned up
+        {
+        BSP_LED_HSL hsl;
+        LM_get_HSL_of_mode(&hsl, LM_HUE_SHIFTING_MODE);
+        JSM_PRINTF("H: %i, S: %i, L: %i\n", hsl[0],hsl[1],hsl[2]);
+        hsl[2] -= SFP_11_20_ONE/100U*(e.repeats+1);
+        if ( hsl[2] < 0){
+            hsl[2] = 0;
+         }
+        JSM_PRINTF("New lightness: %i\n", hsl[2]);
+        JSM_PRINTF("H: %i, S: %i, L: %i\n", hsl[0],hsl[1],hsl[2]);
+        LM_set_HSL_of_mode(LM_HUE_SHIFTING_MODE, &hsl);
+        }
         break;
 
     default:

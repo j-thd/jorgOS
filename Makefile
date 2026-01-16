@@ -89,7 +89,7 @@ $(target-image-info): $(target-image)
 # Link all object files into target image
 $(target-image) : $(all-object-files)
 	$(MKDIR) -p $(@D)
-	armlink --info sizes --map --list $(notdir target-linking-info) --library_type=microlib --scatter=$(scatter-file) $^ -o $@
+	armlink --info sizes,stack --map --list $(notdir target-linking-info.txt) --library_type=microlib --scatter=$(scatter-file) $^ -o $@
 
 # Build all c-files
 $(build-dir)/%.c.o: %.c

@@ -60,12 +60,12 @@ void BSP_switch_tick(OS_EventQueue_Thread * BSP_EQT_thread){
 
     if ( temp & SWITCH_1 ){ // Switch 1 state changed
         if (buttons.depressed & SWITCH_1){ // Switch 1 was pressed this tick
-            J_Event e = {BUTTON_1_DEPRESSED};
+            J_Event e = {BUTTON_1_DEPRESSED, 0U};
             OS_EQT_post(BSP_EQT_thread, e);
             //JSM_PRINTF("Switch 1 pressed\n");
         }
         else { // The switch was just released
-            J_Event e = {BUTTON_1_RELEASED};
+            J_Event e = {BUTTON_1_RELEASED, 0U};
             OS_EQT_post(BSP_EQT_thread, e);
             //JSM_PRINTF("Switch 1 released\n");
         }
@@ -73,12 +73,12 @@ void BSP_switch_tick(OS_EventQueue_Thread * BSP_EQT_thread){
 
     if ( temp & SWITCH_2 ){ // Switch 1 state changed
         if (buttons.depressed & SWITCH_2){ // Switch 2 was pressed this tick
-            J_Event e = {BUTTON_2_DEPRESSED};
+            J_Event e = {BUTTON_2_DEPRESSED, 0U};
             OS_EQT_post(BSP_EQT_thread, e);
             //JSM_PRINTF("Switch 2 pressed\n");
         }
         else { // The switch was just released
-            J_Event e = {BUTTON_2_RELEASED};
+            J_Event e = {BUTTON_2_RELEASED, 0U};
             OS_EQT_post(BSP_EQT_thread, e);
             //JSM_PRINTF("Switch 2 released\n");
         }

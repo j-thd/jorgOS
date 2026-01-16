@@ -9,7 +9,10 @@
 /// information along with the event.
 typedef struct J_Event {
     uint8_t sig; // The event to be handled. Events should be defined in an enum.
+    uint16_t repeats; // How often the event is duplicated
 } J_Event;
+
+#define J_EVENT_MAX_REPEATS UINT16_MAX
 
 // Default events.
 enum DefaultSignals{

@@ -97,26 +97,28 @@ void QEI_tick(OS_EventQueue_Thread * BSP_EQT_thread){
 
     // How often has the knob turned. Do not alter afterwards, as it is used as
     // the counter in the for loop as well.
-    int32_t delta_pos = abs(previous_QEI_0_pos - current_QEI_0_pos);
+    uint32_t delta_pos = abs((int32_t)previous_QEI_0_pos - (int32_t)current_QEI_0_pos);
     // To understand whether we must post a CLOCKWISE or ANTI-CLOCKWISE event,
     // we to know sign of the change.
     
     int32_t delta_sign = JM_sign(previous_QEI_0_pos - current_QEI_0_pos);
 
     // Based on the sign, we set the events we are going to post.
-    // The edge case of 0 will not be checked, because in that case 0 events
-    // will be posted anyway.
-    J_Event e = {0}; // e can go out of scope, because it will be copied into the buffer of the queue
+    // Be mindful that the sign can be 0, in which we should NOT post an event.
+
+    J_ASSERT(delta_pos <= J_EVENT_MAX_REPEATS);
+    // Repeats starts at 0.
+    J_Event e = {0U, (uint16_t)delta_pos-1U}; // e can go out of scope, because it will be copied into the buffer of the queue
     if (delta_sign > 0){
         e.sig = KNOB_1_CLOCKWISE;
-    } else {
+        OS_EQT_post(BSP_EQT_thread, e);
+    } else if (delta_sign < 0){
         e.sig = KNOB_1_ANTI_CLOCKWISE;
-    }
-
-    // Post the event
-    for ( ; delta_pos >0; --delta_pos){
+        // Post the event
         OS_EQT_post(BSP_EQT_thread, e);
     }
+
+    
 
 
     // Update the previous_pos. Note that this also means that we can later
