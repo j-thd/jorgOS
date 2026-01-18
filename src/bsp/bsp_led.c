@@ -179,33 +179,7 @@ void BSP_LED_RGB_from_HSL(BSP_LED_RGB * p_rgb, BSP_LED_HSL* p_hsl){
 
 
 
-void BSP_LED_update(void){
-    // Needs better stuff here.
-}
 
-void BSP_LED_red_on(void){
-    GPIOF_AHB->DATA_BITS[(LED_RED)] = LED_RED;
-}
-
-void BSP_LED_red_off(void){
-    GPIOF_AHB->DATA_BITS[(LED_RED)] = 0;
-}
-
-void BSP_LED_green_on(void){
-    GPIOF_AHB->DATA_BITS[(LED_GREEN)] = LED_GREEN;
-}
-
-void BSP_LED_green_off(void){
-    GPIOF_AHB->DATA_BITS[(LED_GREEN)] = 0;
-}
-
-void BSP_LED_blue_on(void){
-    GPIOF_AHB->DATA_BITS[(LED_BLUE)] = LED_BLUE;
-}
-
-void BSP_LED_blue_off(void){
-    GPIOF_AHB->DATA_BITS[(LED_BLUE)] = 0;
-}
 
 // LED COLOURS THROUGH PWM
 void BSP_LED_PWM_init(void){
@@ -214,9 +188,9 @@ void BSP_LED_PWM_init(void){
     SYSCTL->RCGCPWM |= (1U << 1); // Enable clock for PWM1
     // Set the pins to alternative functions so it can be set respond to PWM
     // signals
-    GPIOF_AHB->AFSEL |= (LED_RED | LED_GREEN | LED_BLUE);
+    GPIOF_AHB->AFSEL |= (LED_1_RED | LED_1_GREEN | LED_1_BLUE);
     //Set the Port Control to the PWM signals.
-    GPIOF_AHB->PCTL |= (LED_RED_PMC | LED_GREEN_PMC | LED_BLUE_PMC);
+    GPIOF_AHB->PCTL |= (LED_1_RED_PMC | LED_1_GREEN_PMC | LED_1_BLUE_PMC);
     // Turn on the clock divisor for PWM
     SYSCTL->RCC |= 1U << RCC_USEPWMDIV;
     // Set the divisor to 2 with 0x0, realizing it is 0x7 by default.

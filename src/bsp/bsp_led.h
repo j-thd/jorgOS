@@ -6,9 +6,9 @@
 #include "jfp.h"
 
 // LED
-#define LED_RED (1U << 1)
-#define LED_BLUE (1U << 2)
-#define LED_GREEN (1U << 3)
+#define LED_1_RED (1U << 1)
+#define LED_1_BLUE (1U << 2)
+#define LED_1_GREEN (1U << 3)
 
 
 // Type definitions allowing for some clarity and consitency
@@ -39,9 +39,9 @@ void BSP_LED_PWM_init(void);
 // The GPIOPCTL value to set the led pins to the PWM signals
 #define PCTL_LED_PWM (0x5)
 // Port Mux Control values to set LEDS to PWM
-#define LED_RED_PMC    ( PCTL_LED_PWM << 4  )
-#define LED_GREEN_PMC  ( PCTL_LED_PWM << 8  )
-#define LED_BLUE_PMC   ( PCTL_LED_PWM << 12 )
+#define LED_1_RED_PMC    ( PCTL_LED_PWM << 4  )
+#define LED_1_GREEN_PMC  ( PCTL_LED_PWM << 8  )
+#define LED_1_BLUE_PMC   ( PCTL_LED_PWM << 12 )
 
 #define BSP_LED_MAX_LOAD_VALUE 0xFF
 

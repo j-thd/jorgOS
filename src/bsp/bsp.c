@@ -19,8 +19,8 @@ OS_EventQueue_Thread * BSP_EQT_thread;
 void BSP_init(void){
     SYSCTL->RCGC2 |= (1U << 5); // Enable clock for GPIOF
     SYSCTL->GPIOHBCTL  |= (1U <<5); // Enable AHB for GPIOF
-    GPIOF_AHB->DIR |= ( LED_RED | LED_BLUE | LED_GREEN ); //Set Pin direction on pin 1, 2, 3 as output.
-    GPIOF_AHB->DEN |= ( LED_RED | LED_BLUE | LED_GREEN ); // Digital Enable 
+    GPIOF_AHB->DIR |= ( LED_1_RED | LED_1_BLUE | LED_1_GREEN ); //Set Pin direction on pin 1, 2, 3 as output.
+    GPIOF_AHB->DEN |= ( LED_1_RED | LED_1_BLUE | LED_1_GREEN ); // Digital Enable 
 
    
 
