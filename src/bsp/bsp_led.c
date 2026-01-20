@@ -5,6 +5,17 @@
 #include "jfp.h"
 #include "jAssert.h"
 
+
+LED_PWM_CMP_Addresses LED_PWM_CMP_addresses[LED_TOTAL_AMOUNT] =
+{
+    {
+        (uint32_t*)((uint32_t)PWM1 + offsetof(PWM0_Type, _2_CMPB)),
+        (uint32_t*)((uint32_t)PWM1 + offsetof(PWM0_Type, _3_CMPB)),
+        (uint32_t*)((uint32_t)PWM1 + offsetof(PWM0_Type, _3_CMPA))
+    }
+};
+
+
 /// @brief Set Colour using HSL
 /// @param hue 0-360
 /// @param saturation 0-1
@@ -35,16 +46,9 @@ static void BSP_LED_set_PWM_signal(BSP_LED_RGB * p_rgb){
     // The signal is inverted so CMP values actually drive the target high now.
     // The inversion stops the tiny blip of light when you want the LED to be dark.
 
-    // The "order" of the PWM signals is rBG instead or rGB.
-    PWM1->_2_CMPB = (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
-    PWM1->_3_CMPA = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
-    PWM1->_3_CMPB = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
-
-    // JSM_PRINTF("\nR: %i\tG: %i\tB: %i\n", 
-    //     ((BSP_LED_RGB_TYPE *)p_rgb)[0], 
-    //     ((BSP_LED_RGB_TYPE *)p_rgb)[1], 
-    //     ((BSP_LED_RGB_TYPE *)p_rgb)[2]
-    // );
+    *(LED_PWM_CMP_addresses[LED_0].red)= (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
+    *(LED_PWM_CMP_addresses[LED_0].green) = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
+    *(LED_PWM_CMP_addresses[LED_0].blue) = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
 
 }
 
@@ -188,7 +192,7 @@ void BSP_LED_PWM_init(void){
     SYSCTL->RCGCPWM |= (1U << 1); // Enable clock for PWM1
     // Set the pins to alternative functions so it can be set respond to PWM
     // signals
-    GPIOF_AHB->AFSEL |= (LED_1_RED | LED_1_GREEN | LED_1_BLUE);
+    GPIOF_AHB->AFSEL |= (LED_0_RED | LED_0_GREEN | LED_0_BLUE);
     //Set the Port Control to the PWM signals.
     GPIOF_AHB->PCTL |= (LED_1_RED_PMC | LED_1_GREEN_PMC | LED_1_BLUE_PMC);
     // Turn on the clock divisor for PWM

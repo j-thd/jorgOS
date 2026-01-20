@@ -1,14 +1,31 @@
 #ifndef __BSP_LED_H__
 #define __BSP_LED_H__
 
+#include <stddef.h>
+
 #include "runtime_environment.h"
 
 #include "jfp.h"
 
+// Number the LEDs so functions can start to distinguish between LEDS that need
+// to be actuated.
+enum LED_INDEX {
+    LED_0,
+    LED_TOTAL_AMOUNT // Used for checking the idx.
+};
+
+/// @brief Holds the addresses of the comparators that need to be updated for
+/// one RGB led to be updated.
+typedef struct LED_PWM_CMP_Addresses {
+    uint32_t * red;
+    uint32_t * green;
+    uint32_t * blue;
+} LED_PWM_CMP_Addresses;
+
 // LED
-#define LED_1_RED (1U << 1)
-#define LED_1_BLUE (1U << 2)
-#define LED_1_GREEN (1U << 3)
+#define LED_0_RED (1U << 1)
+#define LED_0_BLUE (1U << 2)
+#define LED_0_GREEN (1U << 3)
 
 
 // Type definitions allowing for some clarity and consitency
