@@ -4,13 +4,14 @@
 #include <stddef.h>
 
 #include "runtime_environment.h"
-
+#include "bsp_gpio.h"
 #include "jfp.h"
 
 // Number the LEDs so functions can start to distinguish between LEDS that need
 // to be actuated.
 enum LED_INDEX {
     LED_0,
+    LED_1,
     LED_TOTAL_AMOUNT // Used for checking the idx.
 };
 
@@ -22,10 +23,42 @@ typedef struct LED_PWM_CMP_Addresses {
     uint32_t * blue;
 } LED_PWM_CMP_Addresses;
 
-// LED
-#define LED_0_RED (1U << 1)
-#define LED_0_BLUE (1U << 2)
-#define LED_0_GREEN (1U << 3)
+
+// PWM MODULES USED FOR EACH LED
+#define LED_0_RED_PWM_MODULE   PWM1
+#define LED_0_GREEN_PWM_MODULE PWM1
+#define LED_0_BLUE_PWM_MODULE  PWM1
+
+#define LED_1_RED_PWM_MODULE   PWM1
+#define LED_1_GREEN_PWM_MODULE PWM1
+#define LED_1_BLUE_PWM_MODULE  PWM1
+
+// COMPARATORS USED FOR EACH LED
+#define LED_0_RED_CMP   _2_CMPB // PIN F1 - M1PWM5 - Generator 2b 
+#define LED_0_GREEN_CMP _3_CMPB // PIN F3 - M1PWM7 - Generator 3b
+#define LED_0_BLUE_CMP  _3_CMPA // PIN F2 - M1PWM6 - Generator 3a
+
+#define LED_1_RED_CMP   _1_CMPB // PIN E5 - M1PWM3 - Generator 1b
+#define LED_1_GREEN_CMP _0_CMPB // PIN D1 - M1PWM1 - Generator 0b
+#define LED_1_BLUE_CMP  _1_CMPA // PIN E4 - M1PWM2 - Generator 1a
+
+// LED to GPIO mapping
+#define LED_0_RED       GPIO_F_1
+#define LED_0_BLUE      GPIO_F_2
+#define LED_0_GREEN     GPIO_F_3
+
+#define LED_1_RED       GPIO_E_5
+#define LED_1_GREEN     GPIO_D_1
+#define LED_1_BLUE      GPIO_E_4
+
+// LED to PWM Mapping
+#define LED_0_RED_PWM       (1U << 5)
+#define LED_0_GREEN_PWM     (1U << 7)
+#define LED_0_BLUE_PWM      (1u << 6)
+
+#define LED_1_RED_PWM       (1U << 3)
+#define LED_1_GREEN_PWM     (1U << 1)
+#define LED_1_BLUE_PWM      (1U << 2)
 
 
 // Type definitions allowing for some clarity and consitency
@@ -56,9 +89,13 @@ void BSP_LED_PWM_init(void);
 // The GPIOPCTL value to set the led pins to the PWM signals
 #define PCTL_LED_PWM (0x5)
 // Port Mux Control values to set LEDS to PWM
-#define LED_1_RED_PMC    ( PCTL_LED_PWM << 4  )
-#define LED_1_GREEN_PMC  ( PCTL_LED_PWM << 8  )
-#define LED_1_BLUE_PMC   ( PCTL_LED_PWM << 12 )
+#define LED_0_RED_PMC    ( PCTL_LED_PWM << GPIO_F_1_PMC )
+#define LED_0_GREEN_PMC  ( PCTL_LED_PWM << GPIO_F_3_PMC )
+#define LED_0_BLUE_PMC   ( PCTL_LED_PWM << GPIO_F_2_PMC )
+
+#define LED_1_RED_PMC    ( PCTL_LED_PWM << GPIO_E_5_PMC )
+#define LED_1_GREEN_PMC  ( PCTL_LED_PWM << GPIO_D_1_PMC )
+#define LED_1_BLUE_PMC   ( PCTL_LED_PWM << GPIO_E_4_PMC )
 
 #define BSP_LED_MAX_LOAD_VALUE 0xFF
 

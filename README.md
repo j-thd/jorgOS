@@ -20,9 +20,8 @@ education purposes, but it does make for a lot of comments that are not always u
 
 In its current form the project is nothing more than world's most needlessly complex "blinky" program , which alters the LED colours and blinking modes based on switch and
 rotary knob inputs. I went out of my way to learn fundamental concepts along the
-way, so this is what happens:
-
-The rough code flow is as follow:.
+way. This section details what happens when the code runs. The next section
+summarizes the features, tools and skills learned along the way.
 
 We enter `main()` and call:
 

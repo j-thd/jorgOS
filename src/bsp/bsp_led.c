@@ -4,14 +4,23 @@
 #include "bsp_led.h"
 #include "jfp.h"
 #include "jAssert.h"
+#include "jUtil.h"
+
+
+
 
 
 LED_PWM_CMP_Addresses LED_PWM_CMP_addresses[LED_TOTAL_AMOUNT] =
 {
     {
-        (uint32_t*)((uint32_t)PWM1 + offsetof(PWM0_Type, _2_CMPB)),
-        (uint32_t*)((uint32_t)PWM1 + offsetof(PWM0_Type, _3_CMPB)),
-        (uint32_t*)((uint32_t)PWM1 + offsetof(PWM0_Type, _3_CMPA))
+        J_STRUCT_MEMBER_ADDRESS(LED_0_RED_PWM_MODULE,      PWM0_Type, LED_0_RED_CMP),
+        J_STRUCT_MEMBER_ADDRESS(LED_0_GREEN_PWM_MODULE,    PWM0_Type, LED_0_GREEN_CMP),
+        J_STRUCT_MEMBER_ADDRESS(LED_0_BLUE_PWM_MODULE,     PWM0_Type, LED_0_BLUE_CMP)
+    },
+    {
+        J_STRUCT_MEMBER_ADDRESS(LED_1_RED_PWM_MODULE,      PWM0_Type, LED_1_RED_CMP),
+        J_STRUCT_MEMBER_ADDRESS(LED_1_GREEN_PWM_MODULE,    PWM0_Type, LED_1_GREEN_CMP),
+        J_STRUCT_MEMBER_ADDRESS(LED_1_BLUE_PWM_MODULE,     PWM0_Type, LED_1_BLUE_CMP)
     }
 };
 
@@ -45,10 +54,13 @@ static void BSP_LED_set_PWM_signal(BSP_LED_RGB * p_rgb){
 
     // The signal is inverted so CMP values actually drive the target high now.
     // The inversion stops the tiny blip of light when you want the LED to be dark.
-
     *(LED_PWM_CMP_addresses[LED_0].red)= (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
     *(LED_PWM_CMP_addresses[LED_0].green) = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
     *(LED_PWM_CMP_addresses[LED_0].blue) = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
+
+    *(LED_PWM_CMP_addresses[LED_1].red)= (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
+    *(LED_PWM_CMP_addresses[LED_1].green) = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
+    *(LED_PWM_CMP_addresses[LED_1].blue) = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
 
 }
 
@@ -190,11 +202,39 @@ void BSP_LED_PWM_init(void){
     // This is partially based on the TM4C datasheet page 1239. Register names
     // seem to be deprecated in this manual.
     SYSCTL->RCGCPWM |= (1U << 1); // Enable clock for PWM1
-    // Set the pins to alternative functions so it can be set respond to PWM
-    // signals
+
+
+    // CONFIGURING GPIO F for LED 0
+    GPIOF_AHB->DIR |= ( LED_0_RED | LED_0_BLUE | LED_0_GREEN ); //Set Pin direction on pin 1, 2, 3 as output.
+    GPIOF_AHB->DEN |= ( LED_0_RED | LED_0_BLUE | LED_0_GREEN ); // Digital Enable 
+
+    /// CONFIGURING GPIO D & E FOR LED 1
+    // D
+    GPIOD_AHB->DIR |= LED_1_GREEN;
+    GPIOD_AHB->DEN |= LED_1_GREEN;
+    // E
+    GPIOE_AHB->DIR |= LED_1_RED | LED_1_BLUE;
+    GPIOE_AHB->DEN |= LED_1_RED | LED_1_BLUE;
+
+
+
+
+    // GPIO ALTERNATIVE FUNCTION SELECT
+    
+    // LED 0
     GPIOF_AHB->AFSEL |= (LED_0_RED | LED_0_GREEN | LED_0_BLUE);
+    // LED 1
+    GPIOD_AHB->AFSEL |= (LED_1_GREEN);
+    GPIOE_AHB->AFSEL |= (LED_1_RED | LED_1_BLUE);
+
+
     //Set the Port Control to the PWM signals.
-    GPIOF_AHB->PCTL |= (LED_1_RED_PMC | LED_1_GREEN_PMC | LED_1_BLUE_PMC);
+    // LED 0
+    GPIOF_AHB->PCTL |= (LED_0_RED_PMC | LED_0_GREEN_PMC | LED_0_BLUE_PMC);
+    // LED 1
+    GPIOD_AHB->PCTL |= LED_1_GREEN_PMC;
+    GPIOE_AHB->PCTL |= LED_1_RED_PMC | LED_1_BLUE_PMC;
+
     // Turn on the clock divisor for PWM
     SYSCTL->RCC |= 1U << RCC_USEPWMDIV;
     // Set the divisor to 2 with 0x0, realizing it is 0x7 by default.
@@ -206,11 +246,21 @@ void BSP_LED_PWM_init(void){
     // settings, which mostly consists bitfields for it being enabled and how it
     // should deal with updates to particular values (synchronization). Also,
     // something about fault handling.
-    // PWM Block 1 Generator 2 b is for Pin F1 (red LED)
-    PWM1->_2_CTL = 0x0;
-    // PWM Block 1 Generator 3 a & b is for Pin F2 & F3 (blue & green LED)
-    PWM1->_3_CTL = 0x0;
     
+    
+    
+    // PWM Block 1 Generator 2 b is for Pin F1 (LED 0 RED)
+    PWM1->_2_CTL = 0x0;
+    // PWM Block 1 Generator 3 a & b is for Pin F2 & F3 (blue & green LED 0)
+    PWM1->_3_CTL = 0x0;
+    // LED 1
+    PWM1->_0_CTL = 0x0;
+    PWM1->_1_CTL = 0x0;
+    
+    //// Configuring the generators
+    /*
+        LED 0
+    */
     // RED LED (Generator 2 pwm b)
     // Drive the pwmB signal high on LOAD value and low on CMP B value (when
     // counting down)
@@ -223,19 +273,34 @@ void BSP_LED_PWM_init(void){
     // Drive the pwmB signal high on LOAD value and low on CMP B value (when
     // counting down)
     PWM1->_3_GENB = ( ACTLOAD_PWM_x_HIGH | ACTCMPBD_PWM_x_LOW );
+    /*
+        LED 1
+    */
+    PWM1->_0_GENB = ( ACTLOAD_PWM_x_HIGH | ACTCMPBD_PWM_x_LOW ); // LED 1 GREEN
+    PWM1->_1_GENA = ( ACTLOAD_PWM_x_HIGH | ACTCMPAD_PWM_x_LOW ); // LED 1 BLUE
+    PWM1->_1_GENB = ( ACTLOAD_PWM_x_HIGH | ACTCMPBD_PWM_x_LOW ); // LED 1 RED
+
 
     // Provided that the clock is 10 MHz (System clock divided by 2 with PWMDIV
     // 399 for 400 ticks per period for 40 microseconds resulting in 25 kHz
+    // LED 0
     PWM1->_2_LOAD = BSP_LED_MAX_LOAD_VALUE; // This value drives pwm high according to GENx settings
     PWM1->_3_LOAD = BSP_LED_MAX_LOAD_VALUE;
-    // 99 for 75% duty cycle (100/400). 
+    // LED 1 
+    PWM1->_0_LOAD = BSP_LED_MAX_LOAD_VALUE;
+    PWM1->_1_LOAD = BSP_LED_MAX_LOAD_VALUE;
 
     // Inverting the signal might get rid of the tiny blip when the cmp value is
     // 0 (although I suppose it introduces a tiny dimming too, but don't really
     // care about that. That won't be visible at all.)
-    PWM1->INVERT = 0x7 << 5;
+    PWM1->INVERT = LED_0_RED_PWM | LED_0_GREEN_PWM | LED_0_BLUE_PWM |
+        LED_1_RED_PWM | LED_1_GREEN_PWM | LED_1_BLUE_PWM;
 
+    PWM1->_0_CTL = 0x1; // Enable PWM 1 Generator 0
+    PWM1->_1_CTL = 0x1; // Enable PWM 1 Generator 1
     PWM1->_2_CTL = 0x1; // Enable PWM 1 Generator 2
     PWM1->_3_CTL = 0x1; // Enable PWM 1 Generator 3
-    PWM1->ENABLE = 0x7 << 5; // Enable pwm5(3b), 6(4a) and 7(4b)
+    // Enable LED 0  and LED 1
+    PWM1->ENABLE = LED_0_RED_PWM | LED_0_GREEN_PWM | LED_0_BLUE_PWM |
+        LED_1_RED_PWM | LED_1_GREEN_PWM | LED_1_BLUE_PWM; 
 }

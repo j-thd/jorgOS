@@ -2,6 +2,7 @@
 
 #include "runtime_environment.h"
 #include "bsp.h"
+#include "bsp_gpio.h"
 #include "bsp_timer.h"
 #include "bsp_led.h"
 #include "bsp_switch.h"
@@ -17,12 +18,9 @@
 OS_EventQueue_Thread * BSP_EQT_thread;
 
 void BSP_init(void){
-    SYSCTL->RCGC2 |= (1U << 5); // Enable clock for GPIOF
-    SYSCTL->GPIOHBCTL  |= (1U <<5); // Enable AHB for GPIOF
-    GPIOF_AHB->DIR |= ( LED_0_RED | LED_0_BLUE | LED_0_GREEN ); //Set Pin direction on pin 1, 2, 3 as output.
-    GPIOF_AHB->DEN |= ( LED_0_RED | LED_0_BLUE | LED_0_GREEN ); // Digital Enable 
-
-   
+    
+    // Initialize GPIO modules
+    BSP_GPIO_init();
 
     // Initialize PWM to drive the LEDs
     BSP_LED_PWM_init();
