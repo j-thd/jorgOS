@@ -24,32 +24,66 @@
 #include "bsp_led.h"
 
 
-void LM_init(uint8_t);
-void LM_tick();
 
-typedef uint8_t LM_mode;
-
-enum LM_modes {
+typedef enum LM_mode {
     LM_ALWAYS_ON_MODE,
     LM_BLINKING_MODE,
     LM_HUE_SHIFTING_MODE,
     LM_NR_OF_MODES // Not a mode but for comparing if modes are valid
-};
+} LM_mode_t;
 
-void LM_set_active_mode(uint8_t, bool);
+// Structs or variables to describe the state of each mode
+
+// LM_ALWAYS_ON_MODE
+// Nothing needs to be registered here.
+
+// LM_BLINKING_MODE
+typedef struct LM_Blinking_State{
+    uint16_t blinking_mode_time_on; // [ms]
+    uint16_t blinking_mode_time_off; // [ms]
+} LM_Blinking_State;
+
+// HUE SHIFTING MODE
+// The period must be shifted into an SFP_11_20, so there is a bound on what
+// works for calculation purposes. Let's make the max 10 minutes and work down
+// from there.
+#define HUE_SHIFTING_MODE_PERIOD_MAX  (10U * 60U * 1000U)
+
+typedef struct  LM_Hue_Shifting_State{
+    uint16_t hue_shifting_mode_period;
+} LM_Hue_Shifting_State;
+
+// Struct holding the parameters for the current mode
+typedef struct LM_mode_state {
+    LM_mode_t current_mode; // This determines what variant of the union is used.
+    BSP_LED_HSL hsl[LM_NR_OF_MODES];
+    uint32_t t_start_millis;
+    // This struct holds auxiliary state variables that are mode-specific
+    struct{ 
+        // ALWAYS_ON requires no aux.
+        LM_Blinking_State blinking;
+        LM_Hue_Shifting_State hue_shifting;
+    } aux;
+} LM_mode_state;
+
+
+void LM_init();
+void LM_tick();
+
+void LM_set_active_mode(Led_Index_t, LM_mode_t, bool);
 
 // Update functions for specific modes
-static void LM_update_blinking_mode(uint32_t);
-static void LM_update_hue_shifting_mode(uint32_t);
+static void LM_update_blinking_mode(Led_Index_t, uint32_t);
+static void LM_update_hue_shifting_mode(Led_Index_t, uint32_t);
 
 // Update the config for a special mode
-void LM_config_always_on_mode(BSP_LED_HSL *);
-void LM_config_blinking_mode(BSP_LED_HSL *, uint16_t, uint16_t);
-void LM_config_hue_shifting_mode(BSP_LED_HSL *, uint16_t);
+void LM_config_always_on_mode(Led_Index_t, BSP_LED_HSL *);
+void LM_config_blinking_mode(Led_Index_t, BSP_LED_HSL *, uint16_t, uint16_t);
+void LM_config_hue_shifting_mode(Led_Index_t, BSP_LED_HSL *, uint16_t);
 
-//Generic mode setters and getters
-void LM_get_HSL_of_mode(BSP_LED_HSL *, LM_mode mode);
-void LM_set_HSL_of_mode(LM_mode mode, BSP_LED_HSL *);
+//Generic setters and getters
+void LM_get_HSL(Led_Index_t, LM_mode_t, BSP_LED_HSL *);
+void LM_set_HSL(Led_Index_t, LM_mode_t, BSP_LED_HSL *);
 
 
 #endif // __LED_MANAGER_H__

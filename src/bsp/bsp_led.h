@@ -9,11 +9,13 @@
 
 // Number the LEDs so functions can start to distinguish between LEDS that need
 // to be actuated.
-enum LED_INDEX {
+typedef enum LED_INDEX{
     LED_0,
     LED_1,
     LED_TOTAL_AMOUNT // Used for checking the idx.
-};
+} Led_Index_t;
+
+#define TOTAL_LED_NR 2
 
 /// @brief Holds the addresses of the comparators that need to be updated for
 /// one RGB led to be updated.
@@ -77,9 +79,9 @@ void BSP_LED_green_on(void);
 void BSP_LED_blue_off(void);
 void BSP_LED_blue_on(void);
 
-void BSP_LED_set_color_RGB(BSP_LED_RGB*);
-void BSP_LED_set_color_HSL(BSP_LED_HSL*);
-static void BSP_LED_set_PWM_signal(BSP_LED_RGB*);
+void BSP_LED_set_color_RGB(Led_Index_t, BSP_LED_RGB*);
+void BSP_LED_set_color_HSL(Led_Index_t, BSP_LED_HSL*);
+static void BSP_LED_set_PWM_signal(Led_Index_t, BSP_LED_RGB*);
 
 
 void BSP_LED_RGB_from_HSL(BSP_LED_RGB*, BSP_LED_HSL*);

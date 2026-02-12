@@ -220,7 +220,7 @@ void bsp_event_handler(J_Event e){
         // Testing the semaphore.
        
         JSM_PRINTF("BUTTON 1 PRESSED\n");
-        LM_set_active_mode(LM_ALWAYS_ON_MODE, true);
+        LM_set_active_mode(LED_0, LM_ALWAYS_ON_MODE, true);
         
         //J_sema_signal(&sema_test);
 
@@ -228,27 +228,27 @@ void bsp_event_handler(J_Event e){
 
     case BUTTON_1_RELEASED:
         JSM_PRINTF("BUTTON 1 RELEASED\n");
-        LM_set_active_mode(LM_BLINKING_MODE, true);
+        LM_set_active_mode(LED_0, LM_BLINKING_MODE, true);
         break;
 
     case BUTTON_2_DEPRESSED:
         // Test cycling through hues.
 
         JSM_PRINTF("BUTTON 2 PRESSED\n");
-        LM_set_active_mode(LM_ALWAYS_ON_MODE, true);
+        LM_set_active_mode(LED_0, LM_ALWAYS_ON_MODE, true);
         break;
 
     case BUTTON_2_RELEASED:
         JSM_PRINTF("BUTTON 2 RELEASED\n");
-        LM_set_active_mode(LM_HUE_SHIFTING_MODE, true);
+        LM_set_active_mode(LED_0, LM_HUE_SHIFTING_MODE, true);
         break;
 
     case KNOB_1_CLOCKWISE:
         JSM_PRINTF("KNOB 1 TURNED CLOCKWISE %u times\n", e.repeats+1);
-        // Increase lightness if knob gets turned up
+        // Increase lightness of hue shifting mode  if knob gets turned CW
         { // Block-scope to allow re-using hsl as name for clarity. Not sure if this is good practice.
         BSP_LED_HSL hsl;
-        LM_get_HSL_of_mode(&hsl, LM_HUE_SHIFTING_MODE);
+        LM_get_HSL(LED_0, LM_HUE_SHIFTING_MODE, &hsl);
         JSM_PRINTF("H: %i, S: %i, L: %i\n", hsl[0],hsl[1],hsl[2]);
         hsl[2] += SFP_11_20_ONE/100U*(e.repeats+1);
         // Clamp to one
@@ -257,17 +257,17 @@ void bsp_event_handler(J_Event e){
          }
         JSM_PRINTF("New lightness: %i\n", hsl[2]);
         JSM_PRINTF("H: %i, S: %i, L: %i\n", hsl[0],hsl[1],hsl[2]);
-        LM_set_HSL_of_mode(LM_HUE_SHIFTING_MODE, &hsl);
+        LM_set_HSL(LED_0, LM_HUE_SHIFTING_MODE, &hsl);
         }
 
         break;
 
     case KNOB_1_ANTI_CLOCKWISE:
         JSM_PRINTF("KNOB 1 TURNED ANTI-CLOCKWISE %u times\n", e.repeats+1);
-        // Decrease lightness if knob gets turned up
+        // Decrease lightness of hue shifting mode if knob gets turned CCW
         {
         BSP_LED_HSL hsl;
-        LM_get_HSL_of_mode(&hsl, LM_HUE_SHIFTING_MODE);
+        LM_get_HSL(LED_0, LM_HUE_SHIFTING_MODE, &hsl);
         JSM_PRINTF("H: %i, S: %i, L: %i\n", hsl[0],hsl[1],hsl[2]);
         hsl[2] -= SFP_11_20_ONE/100U*(e.repeats+1);
         if ( hsl[2] < 0){
@@ -275,7 +275,7 @@ void bsp_event_handler(J_Event e){
          }
         JSM_PRINTF("New lightness: %i\n", hsl[2]);
         JSM_PRINTF("H: %i, S: %i, L: %i\n", hsl[0],hsl[1],hsl[2]);
-        LM_set_HSL_of_mode(LM_HUE_SHIFTING_MODE, &hsl);
+        LM_set_HSL(LED_0, LM_HUE_SHIFTING_MODE, &hsl);
         }
         break;
 
@@ -288,15 +288,24 @@ void bsp_event_handler(J_Event e){
 int main(void) {
     BSP_init();
     JSM_PRINTF("[%u] BSP initialized...\n", BSP_get_time_millis());
-    BSP_LED_set_color_HSL(&hsl);
+    // Set all LEDS to red until Led Manager is initialized
+    for (Led_Index_t LED_idx; LED_idx < LED_TOTAL_AMOUNT; LED_idx ++){
+        BSP_LED_set_color_HSL(LED_idx, &hsl);
+    }
     
-    LM_init(LM_BLINKING_MODE);
+    
+    LM_init();
     JSM_PRINTF("[%u] LM initialized...\n", BSP_get_time_millis());
+    // Configure LED_0
     BSP_LED_HSL hsl_3 = {0, SFP_11_20_ONE, SFP_11_20_ONE };
-    LM_config_always_on_mode(&hsl_3);
+    LM_config_always_on_mode(LED_0, &hsl_3);
     BSP_LED_HSL hsl_2 = { SFP_11_20_ONE*240, SFP_11_20_ONE, SFP_11_20_ONE /2 };
-    LM_config_blinking_mode(&hsl_2,2000U, 1000U);
-    LM_config_hue_shifting_mode(&hsl_2, 30000U);
+    LM_config_blinking_mode(LED_0, &hsl_2, 2000U, 1000U);
+    LM_config_hue_shifting_mode(LED_0, &hsl_2, 30000U);
+
+    // Configure LED_1
+    BSP_LED_HSL hsl_4 = { SFP_11_20_ONE*120, SFP_11_20_ONE, SFP_11_20_ONE /2 };
+    LM_config_always_on_mode(LED_1, &hsl_4);
 
     OS_init();
     JSM_PRINTF("[%u] OS initialized...\n", BSP_get_time_millis());

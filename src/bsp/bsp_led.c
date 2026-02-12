@@ -29,15 +29,17 @@ LED_PWM_CMP_Addresses LED_PWM_CMP_addresses[LED_TOTAL_AMOUNT] =
 /// @param hue 0-360
 /// @param saturation 0-1
 /// @param lightness 0-1
-void BSP_LED_set_color_HSL(BSP_LED_HSL* hsl){
-    BSP_LED_RGB rgb; 
+void BSP_LED_set_color_HSL(Led_Index_t Led_Id, BSP_LED_HSL* hsl){
+    BSP_LED_RGB rgb;
+    J_ASSERT(Led_Id < LED_TOTAL_AMOUNT);
     BSP_LED_RGB_from_HSL(&rgb, hsl);
-    BSP_LED_set_PWM_signal(&rgb);
+    BSP_LED_set_PWM_signal(Led_Id, &rgb);
 
 }
 
-void BSP_LED_set_color_RGB(BSP_LED_RGB * p_rgb){
-    BSP_LED_set_PWM_signal(p_rgb);
+void BSP_LED_set_color_RGB(Led_Index_t Led_Id, BSP_LED_RGB * p_rgb){
+    J_ASSERT(Led_Id < LED_TOTAL_AMOUNT);
+    BSP_LED_set_PWM_signal(Led_Id, p_rgb);
 }
 
 
@@ -48,20 +50,19 @@ void BSP_LED_set_color_RGB(BSP_LED_RGB * p_rgb){
 /// @param red 0-255 value
 /// @param green 0-255 value
 /// @param blue 0-255 value
-static void BSP_LED_set_PWM_signal(BSP_LED_RGB * p_rgb){
+static void BSP_LED_set_PWM_signal(Led_Index_t Led_Id, BSP_LED_RGB * p_rgb){
+    J_ASSERT(Led_Id < LED_TOTAL_AMOUNT);
     // Multiply first with MAX load value for less rounding errors
     // MAX LOAD value was 10k at time of writing code, so 16-bit is enough
 
     // The signal is inverted so CMP values actually drive the target high now.
-    // The inversion stops the tiny blip of light when you want the LED to be dark.
-    *(LED_PWM_CMP_addresses[LED_0].red)= (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
-    *(LED_PWM_CMP_addresses[LED_0].green) = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
-    *(LED_PWM_CMP_addresses[LED_0].blue) = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
-
-    *(LED_PWM_CMP_addresses[LED_1].red)= (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; // This value drives 2pwmB low // RED
-    *(LED_PWM_CMP_addresses[LED_1].green) = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmB low // GREEN
-    *(LED_PWM_CMP_addresses[LED_1].blue) = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;// This value drives 3pwmA low // BLUE
-
+    // The inversion stops the tiny blip of light when you want the LED to be
+    // dark.
+                           //  * Address goes here     
+    *(LED_PWM_CMP_addresses[ Led_Id ].red)= (((BSP_LED_RGB_TYPE *)p_rgb)[0] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256; 
+    *(LED_PWM_CMP_addresses[ Led_Id ].green) = (((BSP_LED_RGB_TYPE *)p_rgb)[1] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;
+    *(LED_PWM_CMP_addresses[ Led_Id ].blue) = (((BSP_LED_RGB_TYPE *)p_rgb)[2] * (BSP_LED_MAX_LOAD_VALUE - 1) ) / 256;
+                           //  ^ 
 }
 
 
