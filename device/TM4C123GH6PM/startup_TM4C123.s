@@ -219,7 +219,7 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     PWM1_1_Handler            ; 135: PWM 1 Generator 1
                 DCD     PWM1_2_Handler            ; 136: PWM 1 Generator 2
                 DCD     PWM1_3_Handler            ; 137: PWM 1 Generator 3
-                DCD     PWM1_FAULT_Handler        ; 138: PWM 1 Fault
+                DCD     PWM1_FAULT_Handler        ; 138: PWM 1 Faul
 
 __Vectors_End
 

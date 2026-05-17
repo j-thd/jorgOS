@@ -8,7 +8,7 @@
 
 ; A load region(startup time) is a place where code/data resides before they are copied into the executions regions (runtime)
 ; Load regions contain one or more execution regions
-; First a label is given (I think the label is arbitrary?), then the locationn and MAXIMUM size of the Flash memory is given (which are in the data sheet of the TM4C123GH6PM (Section 2.4 - Memory Model))
+; First a label is given (I think the label is arbitrary?), then the location and MAXIMUM size of the Flash memory is given (which are in the data sheet of the TM4C123GH6PM (Section 2.4 - Memory Model))
 ; Flash memory is a type of memory that retains its data even when the power is switched off, so it is good as a load region.
 
 ; Also remember that address 0x0 is special. It is where the vector table is located, which contains among other things the initial stack pointer and the Reset Handler
@@ -23,7 +23,7 @@ LOAD_REGION 0x00000000 0x00040000 {
 
     ; Now the Read-Write execution region is defined.
     EXECUTION_REGION_RAM 0x20000000 0x00008000 { ; The datasheet gives the correct location and correct size (again, this is the maximum size in the scatter file)
-        .ANY (+RW +ZI) ; Matchh all Read-Write AND Zero-Initiated sections
+        .ANY (+RW +ZI) ; Match all Read-Write AND Zero-Initiated sections
 
     }
 

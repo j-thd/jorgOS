@@ -1,0 +1,304 @@
+/* A startup file for the Gnu Assembler (gas). I have kinda veered off course doing this. */
+
+.section vector_table
+
+
+vector_table_start:         .word    __initial_sp          /* Top of Stack */
+                            .word    Reset_Handler         /* Reset Handler */
+                            .word    NMI_Handler           /* NMI Handler */
+                            .word    HardFault_Handler     /* Hard Fault Handler */
+                            .word    MemManage_Handler     /* MPU Fault Handler */
+                            .word    BusFault_Handler      /* Bus Fault Handler */
+                            .word    UsageFault_Handler    /* Usage Fault Handler */
+                            .word    0                     /* Reserved */
+                            .word    0                     /* Reserved */
+                            .word    0                     /* Reserved */
+                            .word    0                     /* Reserved */
+                            .word    SVC_Handler           /* SVCall Handler */
+                            .word    DebugMon_Handler      /* Debug Monitor Handler */
+                            .word    0                     /* Reserved */
+                            .word    PendSV_Handler        /* PendSV Handler */
+                            .word    SysTick_Handler       /* SysTick Handler */
+                            .word    GPIOA_Handler         /*   0: GPIO Port A */
+                            .word    GPIOB_Handler         /*   1: GPIO Port B */
+                            .word    GPIOC_Handler         /*   2: GPIO Port C */
+                            .word    GPIOD_Handler         /*   3: GPIO Port D */
+                            .word    GPIOE_Handler         /*   4: GPIO Port E */
+                            .word    UART0_Handler         /*   5: UART0 Rx and Tx */
+                            .word    UART1_Handler         /*   6: UART1 Rx and Tx */
+                            .word    SSI0_Handler          /*   7: SSI0 Rx and Tx */
+                            .word    I2C0_Handler          /*   8: I2C0 Master and Slave */
+                            .word    PMW0_FAULT_Handler    /*   9: PWM Fault */
+                            .word    PWM0_0_Handler        /*  10: PWM Generator 0 */
+                            .word    PWM0_1_Handler        /*  11: PWM Generator 1 */
+                            .word    PWM0_2_Handler        /*  12: PWM Generator 2 */
+                            .word    QEI0_Handler          /*  13: Quadrature Encoder 0 */
+                            .word    ADC0SS0_Handler       /*  14: ADC Sequence 0 */
+                            .word    ADC0SS1_Handler       /*  15: ADC Sequence 1 */
+                            .word    ADC0SS2_Handler       /*  16: ADC Sequence 2 */
+                            .word    ADC0SS3_Handler       /*  17: ADC Sequence 3 */
+                            .word    WDT0_Handler          /*  18: Watchdog timer */
+                            .word    TIMER0A_Handler       /*  19: Timer 0 subtimer A */
+                            .word    TIMER0B_Handler       /*  20: Timer 0 subtimer B */
+                            .word    TIMER1A_Handler       /*  21: Timer 1 subtimer A */
+                            .word    TIMER1B_Handler       /*  22: Timer 1 subtimer B */
+                            .word    TIMER2A_Handler       /*  23: Timer 2 subtimer A */
+                            .word    TIMER2B_Handler       /*  24: Timer 2 subtimer B */
+                            .word    COMP0_Handler         /*  25: Analog Comparator 0 */
+                            .word    COMP1_Handler         /*  26: Analog Comparator 1 */
+                            .word    COMP2_Handler         /*  27: Analog Comparator 2 */
+                            .word    SYSCTL_Handler        /*  28: System Control (PLL, OSC, BO) */
+                            .word    FLASH_Handler         /*  29: FLASH Control */
+                            .word    GPIOF_Handler         /*  30: GPIO Port F */
+                            .word    GPIOG_Handler         /*  31: GPIO Port G */
+                            .word    GPIOH_Handler         /*  32: GPIO Port H */
+                            .word    UART2_Handler         /*  33: UART2 Rx and Tx */
+                            .word    SSI1_Handler          /*  34: SSI1 Rx and Tx */
+                            .word    TIMER3A_Handler       /*  35: Timer 3 subtimer A */
+                            .word    TIMER3B_Handler       /*  36: Timer 3 subtimer B */
+                            .word    I2C1_Handler          /*  37: I2C1 Master and Slave */
+                            .word    QEI1_Handler          /*  38: Quadrature Encoder 1 */
+                            .word    CAN0_Handler          /*  39: CAN0 */
+                            .word    CAN1_Handler          /*  40: CAN1 */
+                            .word    CAN2_Handler          /*  41: CAN2 */
+                            .word    0                     /*  42: Reserved */
+                            .word    HIB_Handler           /*  43: Hibernate */
+                            .word    USB0_Handler          /*  44: USB0 */
+                            .word    PWM0_3_Handler        /*  45: PWM Generator 3 */
+                            .word    UDMA_Handler          /*  46: uDMA Software Transfer */
+                            .word    UDMAERR_Handler       /*  47: uDMA Error */
+                            .word    ADC1SS0_Handler       /*  48: ADC1 Sequence 0 */
+                            .word    ADC1SS1_Handler       /*  49: ADC1 Sequence 1 */
+                            .word    ADC1SS2_Handler       /*  50: ADC1 Sequence 2 */
+                            .word    ADC1SS3_Handler       /*  51: ADC1 Sequence 3 */
+                            .word    0                     /*  52: Reserved */
+                            .word    0                     /*  53: Reserved */
+                            .word    GPIOJ_Handler         /*  54: GPIO Port J */
+                            .word    GPIOK_Handler         /*  55: GPIO Port K */
+                            .word    GPIOL_Handler         /*  56: GPIO Port L */
+                            .word    SSI2_Handler          /*  57: SSI2 Rx and Tx */
+                            .word    SSI3_Handler          /*  58: SSI3 Rx and Tx */
+                            .word    UART3_Handler         /*  59: UART3 Rx and Tx */
+                            .word    UART4_Handler         /*  60: UART4 Rx and Tx */
+                            .word    UART5_Handler         /*  61: UART5 Rx and Tx */
+                            .word    UART6_Handler         /*  62: UART6 Rx and Tx */
+                            .word    UART7_Handler         /*  63: UART7 Rx and Tx */
+                            .word    0                     /*  64: Reserved */
+                            .word    0                     /*  65: Reserved */
+                            .word    0                     /*  66: Reserved */
+                            .word    0                     /*  67: Reserved */
+                            .word    I2C2_Handler          /*  68: I2C2 Master and Slave */
+                            .word    I2C3_Handler          /*  69: I2C3 Master and Slave */
+                            .word    TIMER4A_Handler       /*  70: Timer 4 subtimer A */
+                            .word    TIMER4B_Handler       /*  71: Timer 4 subtimer B */
+                            .word    0                     /*  72: Reserved */
+                            .word    0                     /*  73: Reserved */
+                            .word    0                     /*  74: Reserved */
+                            .word    0                     /*  75: Reserved */
+                            .word    0                     /*  76: Reserved */
+                            .word    0                     /*  77: Reserved */
+                            .word    0                     /*  78: Reserved */
+                            .word    0                     /*  79: Reserved */
+                            .word    0                     /*  80: Reserved */
+                            .word    0                     /*  81: Reserved */
+                            .word    0                     /*  82: Reserved */
+                            .word    0                     /*  83: Reserved */
+                            .word    0                     /*  84: Reserved */
+                            .word    0                     /*  85: Reserved */
+                            .word    0                     /*  86: Reserved */
+                            .word    0                     /*  87: Reserved */
+                            .word    0                     /*  88: Reserved */
+                            .word    0                     /*  89: Reserved */
+                            .word    0                     /*  90: Reserved */
+                            .word    0                     /*  91: Reserved */
+                            .word    TIMER5A_Handler       /*  92: Timer 5 subtimer A */
+                            .word    TIMER5B_Handler       /*  93: Timer 5 subtimer B */
+                            .word    WTIMER0A_Handler      /*  94: Wide Timer 0 subtimer A */
+                            .word    WTIMER0B_Handler      /*  95: Wide Timer 0 subtimer B */
+                            .word    WTIMER1A_Handler      /*  96: Wide Timer 1 subtimer A */
+                            .word    WTIMER1B_Handler      /*  97: Wide Timer 1 subtimer B */
+                            .word    WTIMER2A_Handler      /*  98: Wide Timer 2 subtimer A */
+                            .word    WTIMER2B_Handler      /*  99: Wide Timer 2 subtimer B */
+                            .word    WTIMER3A_Handler      /* 100: Wide Timer 3 subtimer A */
+                            .word    WTIMER3B_Handler      /* 101: Wide Timer 3 subtimer B */
+                            .word    WTIMER4A_Handler      /* 102: Wide Timer 4 subtimer A */
+                            .word    WTIMER4B_Handler      /* 103: Wide Timer 4 subtimer B */
+                            .word    WTIMER5A_Handler      /* 104: Wide Timer 5 subtimer A */
+                            .word    WTIMER5B_Handler      /* 105: Wide Timer 5 subtimer B */
+                            .word    FPU_Handler           /* 106: FPU */
+                            .word    0                     /* 107: Reserved */
+                            .word    0                     /* 108: Reserved */
+                            .word    I2C4_Handler          /* 109: I2C4 Master and Slave */
+                            .word    I2C5_Handler          /* 110: I2C5 Master and Slave */
+                            .word    GPIOM_Handler         /* 111: GPIO Port M */
+                            .word    GPION_Handler         /* 112: GPIO Port N */
+                            .word    QEI2_Handler          /* 113: Quadrature Encoder 2 */
+                            .word    0                     /* 114: Reserved */
+                            .word    0                     /* 115: Reserved */
+                            .word    GPIOP0_Handler        /* 116: GPIO Port P (Summary or P0) */
+                            .word    GPIOP1_Handler        /* 117: GPIO Port P1 */
+                            .word    GPIOP2_Handler        /* 118: GPIO Port P2 */
+                            .word    GPIOP3_Handler        /* 119: GPIO Port P3 */
+                            .word    GPIOP4_Handler        /* 120: GPIO Port P4 */
+                            .word    GPIOP5_Handler        /* 121: GPIO Port P5 */
+                            .word    GPIOP6_Handler        /* 122: GPIO Port P6 */
+                            .word    GPIOP7_Handler        /* 123: GPIO Port P7 */
+                            .word    GPIOQ0_Handler        /* 124: GPIO Port Q (Summary or Q0) */
+                            .word    GPIOQ1_Handler        /* 125: GPIO Port Q1 */
+                            .word    GPIOQ2_Handler        /* 126: GPIO Port Q2 */
+                            .word    GPIOQ3_Handler        /* 127: GPIO Port Q3 */
+                            .word    GPIOQ4_Handler        /* 128: GPIO Port Q4 */
+                            .word    GPIOQ5_Handler        /* 129: GPIO Port Q5 */
+                            .word    GPIOQ6_Handler        /* 130: GPIO Port Q6 */
+                            .word    GPIOQ7_Handler        /* 131: GPIO Port Q7 */
+                            .word    GPIOR_Handler         /* 132: GPIO Port R */
+                            .word    GPIOS_Handler         /* 133: GPIO Port S */
+                            .word    PMW1_0_Handler        /* 134: PWM 1 Generator 0 */
+                            .word    PWM1_1_Handler        /* 135: PWM 1 Generator 1 */
+                            .word    PWM1_2_Handler        /* 136: PWM 1 Generator 2 */
+                            .word    PWM1_3_Handler        /* 137: PWM 1 Generator 3 */
+vector_table_end:           .word    PWM1_FAULT_Handler    /* 138: PWM 1 Fault */
+                            .align
+
+.size vector_table_size, vector_table_end - vector_table_start + 1
+
+/* Weak references to the dummy DefaultHandler for everything but the ResetHandler */
+
+    .weakref    NMI_Handler       , DefaultHandler
+    .weakref    HardFault_Handler , DefaultHandler
+    .weakref    MemManage_Handler , DefaultHandler
+    .weakref    BusFault_Handler  , DefaultHandler
+    .weakref    UsageFault_Handler, DefaultHandler
+    .weakref    SVC_Handler       , DefaultHandler
+    .weakref    DebugMon_Handler  , DefaultHandler
+    .weakref    PendSV_Handler    , DefaultHandler
+    .weakref    SysTick_Handler   , DefaultHandler
+    .weakref    GPIOA_Handler     , DefaultHandler
+    .weakref    GPIOB_Handler     , DefaultHandler
+    .weakref    GPIOC_Handler     , DefaultHandler
+    .weakref    GPIOD_Handler     , DefaultHandler
+    .weakref    GPIOE_Handler     , DefaultHandler
+    .weakref    UART0_Handler     , DefaultHandler
+    .weakref    UART1_Handler     , DefaultHandler
+    .weakref    SSI0_Handler      , DefaultHandler
+    .weakref    I2C0_Handler      , DefaultHandler
+    .weakref    PMW0_FAULT_Handler, DefaultHandler
+    .weakref    PWM0_0_Handler    , DefaultHandler
+    .weakref    PWM0_1_Handler    , DefaultHandler
+    .weakref    PWM0_2_Handler    , DefaultHandler
+    .weakref    QEI0_Handler      , DefaultHandler
+    .weakref    ADC0SS0_Handler   , DefaultHandler
+    .weakref    ADC0SS1_Handler   , DefaultHandler
+    .weakref    ADC0SS2_Handler   , DefaultHandler
+    .weakref    ADC0SS3_Handler   , DefaultHandler
+    .weakref    WDT0_Handler      , DefaultHandler
+    .weakref    TIMER0A_Handler   , DefaultHandler
+    .weakref    TIMER0B_Handler   , DefaultHandler
+    .weakref    TIMER1A_Handler   , DefaultHandler
+    .weakref    TIMER1B_Handler   , DefaultHandler
+    .weakref    TIMER2A_Handler   , DefaultHandler
+    .weakref    TIMER2B_Handler   , DefaultHandler
+    .weakref    COMP0_Handler     , DefaultHandler
+    .weakref    COMP1_Handler     , DefaultHandler
+    .weakref    COMP2_Handler     , DefaultHandler
+    .weakref    SYSCTL_Handler    , DefaultHandler
+    .weakref    FLASH_Handler     , DefaultHandler
+    .weakref    GPIOF_Handler     , DefaultHandler
+    .weakref    GPIOG_Handler     , DefaultHandler
+    .weakref    GPIOH_Handler     , DefaultHandler
+    .weakref    UART2_Handler     , DefaultHandler
+    .weakref    SSI1_Handler      , DefaultHandler
+    .weakref    TIMER3A_Handler   , DefaultHandler
+    .weakref    TIMER3B_Handler   , DefaultHandler
+    .weakref    I2C1_Handler      , DefaultHandler
+    .weakref    QEI1_Handler      , DefaultHandler
+    .weakref    CAN0_Handler      , DefaultHandler
+    .weakref    CAN1_Handler      , DefaultHandler
+    .weakref    CAN2_Handler      , DefaultHandler
+    .weakref    HIB_Handler       , DefaultHandler
+    .weakref    USB0_Handler      , DefaultHandler
+    .weakref    PWM0_3_Handler    , DefaultHandler
+    .weakref    UDMA_Handler      , DefaultHandler
+    .weakref    UDMAERR_Handler   , DefaultHandler
+    .weakref    ADC1SS0_Handler   , DefaultHandler
+    .weakref    ADC1SS1_Handler   , DefaultHandler
+    .weakref    ADC1SS2_Handler   , DefaultHandler
+    .weakref    ADC1SS3_Handler   , DefaultHandler
+    .weakref    GPIOJ_Handler     , DefaultHandler
+    .weakref    GPIOK_Handler     , DefaultHandler
+    .weakref    GPIOL_Handler     , DefaultHandler
+    .weakref    SSI2_Handler      , DefaultHandler
+    .weakref    SSI3_Handler      , DefaultHandler
+    .weakref    UART3_Handler     , DefaultHandler
+    .weakref    UART4_Handler     , DefaultHandler
+    .weakref    UART5_Handler     , DefaultHandler
+    .weakref    UART6_Handler     , DefaultHandler
+    .weakref    UART7_Handler     , DefaultHandler
+    .weakref    I2C2_Handler      , DefaultHandler
+    .weakref    I2C3_Handler      , DefaultHandler
+    .weakref    TIMER4A_Handler   , DefaultHandler
+    .weakref    TIMER4B_Handler   , DefaultHandler
+    .weakref    TIMER5A_Handler   , DefaultHandler
+    .weakref    TIMER5B_Handler   , DefaultHandler
+    .weakref    WTIMER0A_Handler  , DefaultHandler
+    .weakref    WTIMER0B_Handler  , DefaultHandler
+    .weakref    WTIMER1A_Handler  , DefaultHandler
+    .weakref    WTIMER1B_Handler  , DefaultHandler
+    .weakref    WTIMER2A_Handler  , DefaultHandler
+    .weakref    WTIMER2B_Handler  , DefaultHandler
+    .weakref    WTIMER3A_Handler  , DefaultHandler
+    .weakref    WTIMER3B_Handler  , DefaultHandler
+    .weakref    WTIMER4A_Handler  , DefaultHandler
+    .weakref    WTIMER4B_Handler  , DefaultHandler
+    .weakref    WTIMER5A_Handler  , DefaultHandler
+    .weakref    WTIMER5B_Handler  , DefaultHandler
+    .weakref    FPU_Handler       , DefaultHandler
+    .weakref    I2C4_Handler      , DefaultHandler
+    .weakref    I2C5_Handler      , DefaultHandler
+    .weakref    GPIOM_Handler     , DefaultHandler
+    .weakref    GPION_Handler     , DefaultHandler
+    .weakref    QEI2_Handler      , DefaultHandler
+    .weakref    GPIOP0_Handler    , DefaultHandler
+    .weakref    GPIOP1_Handler    , DefaultHandler
+    .weakref    GPIOP2_Handler    , DefaultHandler
+    .weakref    GPIOP3_Handler    , DefaultHandler
+    .weakref    GPIOP4_Handler    , DefaultHandler
+    .weakref    GPIOP5_Handler    , DefaultHandler
+    .weakref    GPIOP6_Handler    , DefaultHandler
+    .weakref    GPIOP7_Handler    , DefaultHandler
+    .weakref    GPIOQ0_Handler    , DefaultHandler
+    .weakref    GPIOQ1_Handler    , DefaultHandler
+    .weakref    GPIOQ2_Handler    , DefaultHandler
+    .weakref    GPIOQ3_Handler    , DefaultHandler
+    .weakref    GPIOQ4_Handler    , DefaultHandler
+    .weakref    GPIOQ5_Handler    , DefaultHandler
+    .weakref    GPIOQ6_Handler    , DefaultHandler
+    .weakref    GPIOQ7_Handler    , DefaultHandler
+    .weakref    GPIOR_Handler     , DefaultHandler
+    .weakref    GPIOS_Handler     , DefaultHandler
+    .weakref    PMW1_0_Handler    , DefaultHandler
+    .weakref    PWM1_1_Handler    , DefaultHandler
+    .weakref    PWM1_2_Handler    , DefaultHandler
+    .weakref    PWM1_3_Handler    , DefaultHandler
+    .weakref    PWM1_FAULT_Handler, DefaultHandler
+
+/* ResetHandler and dummy DefaultHandler */
+
+.text  /* Switch to code which goes in the text section */
+
+.func ResetHandler
+ResetHandler:       .align
+                    .type ResetHandler,%function
+                    LDR R0, =SystemInit
+                    BLX R0
+                    LDR R0, =__main
+                    BX R0
+.endfunc
+
+.func DefaultHandler
+DefaultHandler:     .align
+                    .type DefaultHandler,%function
+                    b .
+.endfunc
+
+

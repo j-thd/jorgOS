@@ -4,9 +4,9 @@
             "name": "ARM",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\Program Files\\ArmCompilerforEmbedded6.22\\include",
                 "C:\\code\\custom-cmsis",
-                "C:\\code\\custom-cmsis\\CMSIS-arm-default\\Core\\Include"
+                "C:\\code\\custom-cmsis\\CMSIS-arm-default\\Core\\Include",
+                "C:\\Program Files\\ArmCompilerforEmbedded6.22\\include"
             ],
             "defines": [
                 "_DEBUG",

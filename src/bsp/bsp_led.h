@@ -20,9 +20,9 @@ typedef enum LED_INDEX{
 /// @brief Holds the addresses of the comparators that need to be updated for
 /// one RGB led to be updated.
 typedef struct LED_PWM_CMP_Addresses {
-    uint32_t * red;
-    uint32_t * green;
-    uint32_t * blue;
+    uintptr_t * red;
+    uintptr_t * green;
+    uintptr_t * blue;
 } LED_PWM_CMP_Addresses;
 
 
