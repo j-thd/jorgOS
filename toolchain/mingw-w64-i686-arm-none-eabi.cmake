@@ -2,7 +2,9 @@
 
 # Generic is for bare-metal embedded systems
 set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR ARM)
 
+# Make sure that the test compilation does not try to generate and run an executable.
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # Compilers to use in this toolchain
